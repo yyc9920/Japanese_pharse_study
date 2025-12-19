@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>일본어 표현 학습</title>
     <meta name="description" content="개인용 일본어 문장 학습 웹 어플리케이션">
     <style>
@@ -29,6 +29,8 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden; /* 가로 스크롤 방지 */
+            overscroll-behavior-y: none; /* 모바일 당겨서 새로고침 방지 (앱 느낌) */
         }
 
         /* --- Header Area --- */
@@ -42,7 +44,7 @@
             padding: 10px 0;
         }
 
-        /* Select Elements (View & PerPage) */
+        /* Select Elements */
         select {
             appearance: none;
             background-color: var(--card-bg);
@@ -109,7 +111,7 @@
         }
 
         .toggle-container[data-state="on"] {
-            background-color: #dbeafe; /* Soft blue background */
+            background-color: #dbeafe;
         }
 
         .toggle-container[data-state="on"] .toggle-bg {
@@ -169,16 +171,6 @@
             box-shadow: var(--shadow-md);
             border-color: rgba(0, 122, 255, 0.1);
         }
-        .card-preview .text-content {
-            font-size: 0.95rem;
-            line-height: 1.5;
-            max-height: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-        }
 
         /* View: List */
         .view-list {
@@ -201,19 +193,15 @@
             align-items: center;
             justify-content: center;
         }
-        .card-list:hover {
-            transform: scale(1.005);
-        }
+        .card-list:hover { transform: scale(1.005); }
         .card-list.flipped {
             background-color: #f0f7ff;
             color: var(--accent);
         }
-        
-        /* [수정] List View 텍스트 줄바꿈 처리 */
         .card-list .text-content {
             font-size: 1.3rem;
-            white-space: normal; /* 줄바꿈 허용 */
-            word-wrap: break-word; /* 긴 단어 줄바꿈 */
+            white-space: normal;
+            word-wrap: break-word;
             line-height: 1.5;
         }
 
@@ -224,6 +212,7 @@
             justify-content: center;
             height: 400px;
             perspective: 1000px;
+            overflow: hidden; /* 카드가 날아갈 때 가로 스크롤 방지 */
         }
 
         .card-single {
@@ -231,10 +220,12 @@
             height: 100%;
             background: transparent;
             position: relative;
-            cursor: pointer;
-            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            cursor: grab; /* 마우스 커서 변경 */
+            transition: transform 0.3s ease; /* 기본 트랜지션 */
             transform-style: preserve-3d;
+            touch-action: pan-y; /* 수평 스크롤은 JS로 제어, 수직은 허용 */
         }
+        .card-single:active { cursor: grabbing; }
         
         .card-single.flipped {
             transform: rotateY(180deg);
@@ -248,40 +239,33 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 30px; /* 패딩 조정 */
+            padding: 30px;
             box-sizing: border-box;
             background: var(--card-bg);
             border-radius: 24px;
             box-shadow: var(--shadow-md);
-            overflow-y: auto; /* 내용이 넘칠 경우 스크롤 */
+            overflow-y: auto;
+            user-select: none; /* 텍스트 선택 방지 (드래그 시 불편함 방지) */
         }
 
-        /* Back of card styling */
         .card-back {
             transform: rotateY(180deg);
-            background-color: #f2f8ff; /* Very light blue */
+            background-color: #f2f8ff;
             border: 1px solid #e1ecff;
             color: var(--accent);
             flex-direction: column;
         }
 
-        /* [수정] Common Text Content Wrapper & View Specifics */
+        /* Common Text Content Wrapper */
         .text-content {
             width: 100%;
             text-align: center;
             font-weight: 600;
-            /* word-break: keep-all;  <-- 제거: 긴 문장에서 줄바꿈이 안되는 원인이 될 수 있음 */
-            word-wrap: break-word; /* 긴 단어 강제 줄바꿈 */
-            white-space: normal; /* 줄바꿈 허용 */
+            word-wrap: break-word;
+            white-space: normal;
         }
-
-        /* [수정] Card View 폰트 및 줄바꿈 */
-        .view-card .text-content { 
-            font-size: 1.6rem; /* 폰트 사이즈 약간 축소 */
-            line-height: 1.5;
-        }
-        
-        .view-preview .text-content { font-size: 1rem; }
+        .view-card .text-content { font-size: 1.6rem; line-height: 1.5; }
+        .view-preview .text-content { font-size: 0.95rem; line-height: 1.5; }
 
         /* --- Unified Pagination Controls --- */
         .controls-area {
@@ -324,17 +308,14 @@
             color: white;
             border-color: var(--accent);
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 122, 255, 0.2);
         }
         button.nav-btn:disabled { 
             opacity: 0.4; 
             cursor: default; 
             background: #f9f9f9;
             transform: none;
-            box-shadow: none;
         }
 
-        /* Page Input Field */
         .page-input-group {
             display: flex;
             align-items: center;
@@ -354,18 +335,8 @@
             color: var(--text-main);
             font-weight: 600;
         }
-        .page-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        /* Hide number spinner */
-        .page-input::-webkit-outer-spin-button,
-        .page-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
+        .page-input:focus { outline: none; border-color: var(--accent); }
 
-        /* Pagination Per Page Select */
         .ipp-wrapper {
             display: flex;
             align-items: center;
@@ -385,7 +356,6 @@
             box-shadow: none;
         }
         
-        /* Spinner */
         .spinner {
             border: 3px solid #e5e5ea;
             border-top: 3px solid var(--accent);
@@ -397,31 +367,22 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Mobile Adjustments */
         @media (max-width: 600px) {
-            .view-preview {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .view-card .text-content {
-                font-size: 1.3rem; /* 모바일에서 폰트 더 축소 */
-            }
-            .controls-area {
-                flex-direction: column;
-            }
+            .view-preview { grid-template-columns: repeat(2, 1fr); }
+            .view-card .text-content { font-size: 1.4rem; }
+            .controls-area { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <!-- 1. View Switcher -->
     <select id="view-select" aria-label="View Switcher">
         <option value="preview">Preview View</option>
         <option value="list">List View</option>
         <option value="card">Card View</option>
     </select>
 
-    <!-- 2. Furigana Toggle -->
     <div class="toggle-wrapper">
         <span class="toggle-title">Furigana</span>
         <div class="toggle-container" id="furigana-toggle" data-state="off" role="switch" aria-checked="false">
@@ -436,18 +397,15 @@
     <div class="spinner"></div>
 </div>
 
-<div class="controls-area" id="pagination-controls">
-    <!-- Controls injected via JS -->
-</div>
+<div class="controls-area" id="pagination-controls"></div>
 
 <script>
     /* =========================================
        CONFIGURATION
        ========================================= */
-    // TODO: Gist 생성 후 Raw URL을 아래 따옴표 안에 넣으세요.
     const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/japanese_phrases.csv';
 
-    // 기본 샘플 데이터 (Gist URL이 없을 때 사용됨)
+    // Updated Mock Data (Total 40+ phrases)
     const MOCK_DATA = `Meaning,Kanji,Furigana
 안녕하세요 / Hello,こんにちは,こんにちは
 일본어를 공부하고 있습니다 / I am studying Japanese,日本語を勉強しています,日本[にほん]語[ご]を勉強[べんきょう]しています
@@ -495,11 +453,11 @@
        ========================================= */
     const state = {
         data: [],
-        view: 'preview', // Options: 'preview', 'list', 'card'
+        view: 'preview',
         furigana: false,
         page: 1,
-        itemsPerPage: 10, // List View will now default to 20 via code logic if needed, but sharing this variable
-        currentIndex: 0 // Used for Card View navigation (0-based)
+        itemsPerPage: 10,
+        currentIndex: 0
     };
 
     /* =========================================
@@ -537,8 +495,6 @@
     /* =========================================
        HELPER FUNCTIONS
        ========================================= */
-    
-    // CSV Parsing Logic
     function parseCSV(text) {
         const lines = text.trim().split('\n');
         const result = [];
@@ -546,7 +502,6 @@
             const line = lines[i];
             const firstComma = line.indexOf(',');
             const secondComma = line.indexOf(',', firstComma + 1);
-            
             if (firstComma > -1 && secondComma > -1) {
                 const meaning = line.substring(0, firstComma).trim();
                 const kanji = line.substring(firstComma + 1, secondComma).trim();
@@ -557,12 +512,8 @@
         return result;
     }
 
-    // Get Display Text Logic
     function getDisplayHtml(item) {
-        if (state.furigana) {
-            return item.furigana || item.kanji;
-        }
-        return item.kanji;
+        return state.furigana ? (item.furigana || item.kanji) : item.kanji;
     }
 
     /* =========================================
@@ -570,16 +521,13 @@
        ========================================= */
     viewSelect.addEventListener('change', (e) => {
         state.view = e.target.value;
-        // Reset pagination when switching views for better UX
         state.page = 1;
-        // List view default limit logic could be handled here if we wanted different defaults
         render();
     });
 
     furiganaToggle.addEventListener('click', () => {
         state.furigana = !state.furigana;
         furiganaToggle.dataset.state = state.furigana ? 'on' : 'off';
-        furiganaToggle.setAttribute('aria-checked', state.furigana);
         render(); 
     });
 
@@ -588,19 +536,15 @@
        ========================================= */
     function renderPaginationControls({ current, total, onPrev, onNext, onJump, showPerPage }) {
         paginationControls.innerHTML = '';
-
-        // 1. Pagination Wrapper (Prev | Input / Total | Next)
         const wrapper = document.createElement('div');
         wrapper.className = 'pagination-wrapper';
 
-        // Prev Button
         const prevBtn = document.createElement('button');
         prevBtn.className = 'nav-btn';
         prevBtn.innerText = '← Prev';
         prevBtn.disabled = current <= 1;
         prevBtn.onclick = onPrev;
 
-        // Input Group
         const inputGroup = document.createElement('div');
         inputGroup.className = 'page-input-group';
         
@@ -611,13 +555,12 @@
         input.min = 1;
         input.max = total;
         
-        // Handle Input Change
         const handleJump = () => {
             let val = parseInt(input.value);
             if (isNaN(val) || val < 1) val = 1;
             if (val > total) val = total;
             if (val !== current) onJump(val);
-            else input.value = val; // Reset visual if invalid
+            else input.value = val;
         };
         input.onblur = handleJump;
         input.onkeydown = (e) => { if(e.key === 'Enter') handleJump(); };
@@ -625,7 +568,6 @@
         inputGroup.appendChild(input);
         inputGroup.appendChild(document.createTextNode(` / ${total}`));
 
-        // Next Button
         const nextBtn = document.createElement('button');
         nextBtn.className = 'nav-btn';
         nextBtn.innerText = 'Next →';
@@ -635,10 +577,8 @@
         wrapper.appendChild(prevBtn);
         wrapper.appendChild(inputGroup);
         wrapper.appendChild(nextBtn);
-
         paginationControls.appendChild(wrapper);
 
-        // 2. Per Page Selector (Optional)
         if (showPerPage) {
             const ippWrapper = document.createElement('div');
             ippWrapper.className = 'ipp-wrapper';
@@ -651,10 +591,9 @@
                 </select>
             `;
             paginationControls.appendChild(ippWrapper);
-            
             document.getElementById('ipp-select').addEventListener('change', (e) => {
                 state.itemsPerPage = parseInt(e.target.value);
-                state.page = 1; // Reset to page 1
+                state.page = 1;
                 render();
             });
         }
@@ -665,7 +604,6 @@
        ========================================= */
     function render() {
         appContainer.style.opacity = '0';
-        
         setTimeout(() => {
             appContainer.className = `view-${state.view}`;
             appContainer.innerHTML = '';
@@ -684,14 +622,12 @@
         }, 200);
     }
 
-    // --- 1. Preview View Render ---
     function renderPreview() {
         const start = (state.page - 1) * state.itemsPerPage;
         const end = start + state.itemsPerPage;
         const pageItems = state.data.slice(start, end);
         const totalPages = Math.ceil(state.data.length / state.itemsPerPage) || 1;
 
-        // Render Pagination
         renderPaginationControls({
             current: state.page,
             total: totalPages,
@@ -701,7 +637,6 @@
             showPerPage: true
         });
 
-        // Render Cards
         pageItems.forEach((item, idx) => {
             const realIdx = start + idx;
             const el = document.createElement('div');
@@ -717,31 +652,26 @@
         });
     }
 
-    // --- 2. List View Render (Now with Pagination) ---
     function renderList() {
-        // Use same pagination logic as Preview
         const start = (state.page - 1) * state.itemsPerPage;
         const end = start + state.itemsPerPage;
         const pageItems = state.data.slice(start, end);
         const totalPages = Math.ceil(state.data.length / state.itemsPerPage) || 1;
 
-        // Render Pagination
         renderPaginationControls({
             current: state.page,
             total: totalPages,
             onPrev: () => { state.page--; render(); },
             onNext: () => { state.page++; render(); },
             onJump: (pageNum) => { state.page = pageNum; render(); },
-            showPerPage: true // Allows changing between 10, 20, 30 items
+            showPerPage: true
         });
 
         pageItems.forEach(item => {
             const el = document.createElement('div');
             el.className = 'card-list';
-            
             const jpContent = `<div class="text-content">${getDisplayHtml(item)}</div>`;
             const meaningContent = `<div class="text-content" style="color:var(--accent); font-weight:500;">${item.meaning}</div>`;
-            
             el.innerHTML = jpContent;
             
             let isFlipped = false;
@@ -759,11 +689,10 @@
         });
     }
 
-    // --- 3. Card View Render ---
+    // --- 3. Card View (With Swipe) ---
     function renderCard() {
         const item = state.data[state.currentIndex];
         
-        // Render Pagination (Current is 1-based index for UI)
         renderPaginationControls({
             current: state.currentIndex + 1,
             total: state.data.length,
@@ -776,13 +705,10 @@
         const wrapper = document.createElement('div');
         wrapper.className = 'card-single';
         
-        // Front Face
         const front = `
             <div class="card-face card-front">
                 <div class="text-content">${getDisplayHtml(item)}</div>
             </div>`;
-        
-        // Back Face
         const back = `
             <div class="card-face card-back">
                 <div class="text-content" style="font-size: 1.5rem; margin-bottom: 10px;">${item.meaning}</div>
@@ -791,14 +717,77 @@
         
         wrapper.innerHTML = front + back;
         
-        // Flip Logic
-        wrapper.onclick = () => {
+        // --- Swipe Logic Start ---
+        let startX = 0, startY = 0;
+        let currentX = 0, currentY = 0;
+        let isDragging = false;
+        const swipeThreshold = 80; // Minimum distance to trigger swipe
+
+        wrapper.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isDragging = false;
+            wrapper.style.transition = 'none'; // Dragging 시 즉각 반응을 위해 transition 제거
+        });
+
+        wrapper.addEventListener('touchmove', (e) => {
+            currentX = e.touches[0].clientX;
+            currentY = e.touches[0].clientY;
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+
+            // 수평 움직임이 수직보다 클 때만 스와이프로 간주하고 스크롤 방지
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+                e.preventDefault();
+                isDragging = true;
+                // 카드 이동 및 회전 효과
+                const rotation = deltaX * 0.05;
+                wrapper.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+            }
+        });
+
+        wrapper.addEventListener('touchend', (e) => {
+            wrapper.style.transition = 'transform 0.3s ease'; // Transition 복구
+            const deltaX = currentX - startX;
+
+            if (isDragging) {
+                // Next (Swipe Left)
+                if (deltaX < -swipeThreshold && state.currentIndex < state.data.length - 1) {
+                    wrapper.style.transform = `translateX(-120vw) rotate(-20deg)`;
+                    setTimeout(() => {
+                        state.currentIndex++;
+                        render();
+                    }, 250);
+                } 
+                // Prev (Swipe Right)
+                else if (deltaX > swipeThreshold && state.currentIndex > 0) {
+                    wrapper.style.transform = `translateX(120vw) rotate(20deg)`;
+                    setTimeout(() => {
+                        state.currentIndex--;
+                        render();
+                    }, 250);
+                } 
+                // Return to center (Not enough swipe)
+                else {
+                    wrapper.style.transform = '';
+                }
+            }
+            // Reset
+            startX = 0; startY = 0;
+            currentX = 0; currentY = 0;
+        });
+
+        // Click to Flip (Mouse click or Tap without drag)
+        wrapper.onclick = (e) => {
+            // 드래그가 발생했다면 클릭(뒤집기) 무시
+            if (isDragging) return;
             wrapper.classList.toggle('flipped');
         };
+        // --- Swipe Logic End ---
+
         appContainer.appendChild(wrapper);
     }
 
-    // --- Start App ---
     init();
 
 </script>
