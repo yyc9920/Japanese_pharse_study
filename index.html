@@ -209,6 +209,14 @@
             color: var(--accent);
         }
         
+        /* [수정] List View 텍스트 줄바꿈 처리 */
+        .card-list .text-content {
+            font-size: 1.3rem;
+            white-space: normal; /* 줄바꿈 허용 */
+            word-wrap: break-word; /* 긴 단어 줄바꿈 */
+            line-height: 1.5;
+        }
+
         /* View: Card (Single) */
         .view-card {
             display: flex;
@@ -240,11 +248,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px;
+            padding: 30px; /* 패딩 조정 */
             box-sizing: border-box;
             background: var(--card-bg);
             border-radius: 24px;
             box-shadow: var(--shadow-md);
+            overflow-y: auto; /* 내용이 넘칠 경우 스크롤 */
         }
 
         /* Back of card styling */
@@ -256,18 +265,22 @@
             flex-direction: column;
         }
 
-        /* Common Text Content Wrapper */
+        /* [수정] Common Text Content Wrapper & View Specifics */
         .text-content {
             width: 100%;
             text-align: center;
-            line-height: 1.6;
             font-weight: 600;
-            word-break: keep-all; /* CJK line break rule */
+            /* word-break: keep-all;  <-- 제거: 긴 문장에서 줄바꿈이 안되는 원인이 될 수 있음 */
+            word-wrap: break-word; /* 긴 단어 강제 줄바꿈 */
+            white-space: normal; /* 줄바꿈 허용 */
         }
 
-        /* Font Sizes per View */
-        .view-card .text-content { font-size: 1.8rem; }
-        .view-list .text-content { font-size: 1.3rem; }
+        /* [수정] Card View 폰트 및 줄바꿈 */
+        .view-card .text-content { 
+            font-size: 1.6rem; /* 폰트 사이즈 약간 축소 */
+            line-height: 1.5;
+        }
+        
         .view-preview .text-content { font-size: 1rem; }
 
         /* --- Unified Pagination Controls --- */
@@ -390,7 +403,7 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             .view-card .text-content {
-                font-size: 1.4rem;
+                font-size: 1.3rem; /* 모바일에서 폰트 더 축소 */
             }
             .controls-area {
                 flex-direction: column;
@@ -432,7 +445,7 @@
        CONFIGURATION
        ========================================= */
     // TODO: Gist 생성 후 Raw URL을 아래 따옴표 안에 넣으세요.
-    const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/japanese_phrases.csv'; 
+    const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/japanese_phrases.csv';
 
     // 기본 샘플 데이터 (Gist URL이 없을 때 사용됨)
     const MOCK_DATA = `Meaning,Kanji,Furigana
@@ -455,7 +468,27 @@
 이 근처에 맛집이 있나요? / Is there a good restaurant nearby?,この近くに美味しい店はありますか？,この近[ちか]くに美味[おい]しい店[みせ]はありますか？
 사진을 찍어 주시겠습니까? / Could you take a picture for me?,写真を撮っていただけませんか？,写真[しゃしん]を撮[と]っていただけませんか？
 메뉴판을 보여주세요 / Please show me the menu,メニューを見せてください,メニューを見[み]せてください
-물 좀 주시겠어요? / Could I have some water?,お水をいただけますか？,お水[みず]をいただけますか？`;
+물 좀 주시겠어요? / Could I have some water?,お水をいただけますか？,お水[みず]をいただけますか？
+제 여동생의 사진입니다 / This is a picture of my little sister,これは私の妹の写真です,これは私[わたし]の妹[いもうと]の写真[しゃしん]です
+디즈니랜드에 가고 싶습니다 / I want to go to Disneyland,ディズニーランドに行きたいです,ディズニーランドに行[い]きたいです
+오늘은 일하러 갔습니다 / I went to work today,今日は仕事に行きました,今日[きょう]は仕事[しごと]に行[い]きました
+저 공원에서 만납시다 / Let's meet at that park,あの公園で会いましょう,あの公園[こうえん]で会[あ]いましょう
+여기가 제 집입니다 / This is my house,これが私の家です,これが私[わたし]の家[いえ]です
+모두가 다른 것을 말합니다 / Everyone says something different,みんなが違う事を言う,みんなが違[ちが]う事[こと]を言[い]う
+커서 무엇이 되고 싶니? / What do you want to be when you grow up?,大きくなったら何になる？,大[おお]きくなったら何[なに]になる？
+역에서 학교까지 얼마나 걸립니까? / How long does it take from the station to school?,駅から学校まではどのくらいかかりますか,駅[えき]から学校[がっこう]まではどのくらいかかりますか
+그것은 좋은 생각이 아니라고 생각합니다 / I don't think that's a good idea,それはいいアイディアではないと思う,それはいいアイディアではないと思[おも]う
+세상에는 많은 사람이 있습니다 / There are many people in the world,世界には多くの人がいます,世界[せかい]には多[おお]くの人[ひと]がいます
+자세히 보면 작은 구멍이 있네요 / If you look closely there is a small hole,よく見ると小さな穴があるね,よく見[み]ると小[ちい]さな穴[あな]があるね
+자신의 문제는 스스로 해결하세요 / Solve your own problems yourself,自分の問題は自分で解決しなさい,自分[じぶん]の問題[もんだい]は自分[じぶん]で解決[かいけつ]しなさい
+이쪽으로 와 주세요 / Please come this way,こっちの方にきてください,こっちの方[ほう]にきてください
+저는 건강을 위해 채소를 먹습니다 / I eat vegetables for my health,私は健康の為に野菜を食べます,私[わたし]は健康[けんこう]の為[ため]に野菜[やさい]を食[た]べます
+차에서 라디오를 듣습니다 / I listen to the radio in the car,車でラジオを聴く,車[くるま]でラジオを聴[き]く
+오늘은 새로운 카드를 사용합니다 / I am using a new card today,今日は新しいカードを使う,今日[きょう]は新[あたら]しいカードを使[つか]う
+일본은 섬나라입니다 / Japan is an island nation,日本は島国です,日本[にほん]は島国[しまぐに]です
+인터넷에서 지진에 대한 뉴스를 알게 되었습니다 / I learned about the earthquake news on the internet,インターネットで地震についてのニュースを知った,インターネットで地震[じしん]についてのニュースを知[し]った
+오늘 아주 큰 개를 데리고 있는 사람을 만났습니다 / I met a person with a very big dog today,今日はとても大きな犬を連れている人に会った,今日[きょう]はとても大[おお]きな犬[いぬ]を連[つ]れている人[ひと]に会[あ]った
+저는 매일 일기를 씁니다 / I write a diary every day,私は毎日日記を書く,私[わたし]は毎日[まいにち]日記[にっき]を書[か]く`;
 
     /* =========================================
        STATE MANAGEMENT
