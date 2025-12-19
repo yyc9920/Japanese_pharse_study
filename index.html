@@ -42,7 +42,7 @@
             padding: 10px 0;
         }
 
-        /* View Select Dropdown */
+        /* Select Elements (View & PerPage) */
         select {
             appearance: none;
             background-color: var(--card-bg);
@@ -270,49 +270,86 @@
         .view-list .text-content { font-size: 1.3rem; }
         .view-preview .text-content { font-size: 1rem; }
 
-        /* --- Controls & Pagination --- */
+        /* --- Unified Pagination Controls --- */
         .controls-area {
             width: 100%;
             max-width: 800px;
             margin-top: 20px;
             display: flex;
-            gap: 15px;
             align-items: center;
             justify-content: center;
             padding-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .pagination-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-bg);
+            padding: 8px 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
         }
 
         button.nav-btn {
             background: white;
             border: 1px solid var(--border);
-            padding: 10px 24px;
-            border-radius: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             color: var(--text-sub);
             transition: all 0.2s;
-            box-shadow: var(--shadow-sm);
             font-size: 14px;
+            white-space: nowrap;
+            min-width: 80px;
         }
         button.nav-btn:hover:not(:disabled) {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 122, 255, 0.2);
         }
         button.nav-btn:disabled { 
             opacity: 0.4; 
             cursor: default; 
-            background: #f0f0f0;
+            background: #f9f9f9;
             transform: none;
             box-shadow: none;
         }
 
-        .page-info {
+        /* Page Input Field */
+        .page-input-group {
+            display: flex;
+            align-items: center;
             font-size: 14px;
             color: var(--text-sub);
             font-weight: 500;
+        }
+
+        .page-input {
+            width: 40px;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px;
+            margin-right: 6px;
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .page-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        /* Hide number spinner */
+        .page-input::-webkit-outer-spin-button,
+        .page-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         /* Pagination Per Page Select */
@@ -321,11 +358,18 @@
             align-items: center;
             font-size: 14px;
             color: var(--text-sub);
+            background: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
         }
         .ipp-wrapper select {
             margin-left: 8px;
             padding: 4px 24px 4px 8px;
             font-size: 13px;
+            border: none;
+            background-color: transparent;
+            box-shadow: none;
         }
         
         /* Spinner */
@@ -347,6 +391,9 @@
             }
             .view-card .text-content {
                 font-size: 1.4rem;
+            }
+            .controls-area {
+                flex-direction: column;
             }
         }
     </style>
@@ -384,7 +431,8 @@
     /* =========================================
        CONFIGURATION
        ========================================= */
-    const GIST_URL = 'https://gist.github.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/f374c1a71d80c3b18e30e2d5f791df3e38a44ebd/japanese_phrases.csv'; 
+    // TODO: Gist 생성 후 Raw URL을 아래 따옴표 안에 넣으세요.
+    const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/f374c1a71d80c3b18e30e2d5f791df3e38a44ebd/japanese_phrases.csv'; 
 
     // 기본 샘플 데이터 (Gist URL이 없을 때 사용됨)
     const MOCK_DATA = `Meaning,Kanji,Furigana
@@ -402,7 +450,12 @@
 도와주셔서 감사합니다 / Thank you for your help,手伝ってくれてありがとうございます,手伝[てつだ]ってくれてありがとうございます
 이해하지 못했습니다 / I didn't understand,理解できませんでした,理解[りかい]できませんでした
 천천히 말해 주세요 / Please speak slowly,ゆっくり話してください,ゆっくり話[はな]してください
-화장실은 어디입니까? / Where is the restroom?,お手洗いはどこですか？,お手洗[てあら]いはどこですか？`;
+화장실은 어디입니까? / Where is the restroom?,お手洗いはどこですか？,お手洗[てあら]いはどこですか？
+기차표를 예매하고 싶습니다 / I want to book a train ticket,電車の切符を予約したいです,電車[でんしゃ]の切符[きっぷ]を予約[よやく]したいです
+이 근처에 맛집이 있나요? / Is there a good restaurant nearby?,この近くに美味しい店はありますか？,この近[ちか]くに美味[おい]しい店[みせ]はありますか？
+사진을 찍어 주시겠습니까? / Could you take a picture for me?,写真を撮っていただけませんか？,写真[しゃしん]を撮[と]っていただけませんか？
+메뉴판을 보여주세요 / Please show me the menu,メニューを見せてください,メニューを見[み]せてください
+물 좀 주시겠어요? / Could I have some water?,お水をいただけますか？,お水[みず]をいただけますか？`;
 
     /* =========================================
        STATE MANAGEMENT
@@ -412,8 +465,8 @@
         view: 'preview', // Options: 'preview', 'list', 'card'
         furigana: false,
         page: 1,
-        itemsPerPage: 10,
-        currentIndex: 0 // Used for Card View navigation
+        itemsPerPage: 10, // List View will now default to 20 via code logic if needed, but sharing this variable
+        currentIndex: 0 // Used for Card View navigation (0-based)
     };
 
     /* =========================================
@@ -428,7 +481,6 @@
        INITIALIZATION
        ========================================= */
     async function init() {
-        // GIST URL이 유효하면 fetch 시도, 아니면 Mock Data 사용
         if (GIST_URL && GIST_URL.startsWith('http')) {
             try {
                 const response = await fetch(GIST_URL);
@@ -440,7 +492,6 @@
                 state.data = parseCSV(MOCK_DATA);
             }
         } else {
-            // 로딩 효과 시뮬레이션
             setTimeout(() => {
                 state.data = parseCSV(MOCK_DATA);
                 render();
@@ -458,9 +509,7 @@
     function parseCSV(text) {
         const lines = text.trim().split('\n');
         const result = [];
-        // Header(첫 줄) 건너뛰고 시작
         for(let i=1; i<lines.length; i++) {
-            // 쉼표로 구분하되, 문장 내 쉼표 오작동 방지를 위해 처음 2개의 쉼표만 찾음
             const line = lines[i];
             const firstComma = line.indexOf(',');
             const secondComma = line.indexOf(',', firstComma + 1);
@@ -478,10 +527,8 @@
     // Get Display Text Logic
     function getDisplayHtml(item) {
         if (state.furigana) {
-            // Furigana ON: 3번째 컬럼(괄호 포함) 그대로 표시
             return item.furigana || item.kanji;
         }
-        // Furigana OFF: 2번째 컬럼(Kanji만) 표시
         return item.kanji;
     }
 
@@ -490,7 +537,9 @@
        ========================================= */
     viewSelect.addEventListener('change', (e) => {
         state.view = e.target.value;
-        // 뷰 변경 시 페이지 초기화가 필요하면 state.page = 1; 추가
+        // Reset pagination when switching views for better UX
+        state.page = 1;
+        // List view default limit logic could be handled here if we wanted different defaults
         render();
     });
 
@@ -498,24 +547,99 @@
         state.furigana = !state.furigana;
         furiganaToggle.dataset.state = state.furigana ? 'on' : 'off';
         furiganaToggle.setAttribute('aria-checked', state.furigana);
-        render(); // 텍스트 갱신을 위해 재렌더링
+        render(); 
     });
+
+    /* =========================================
+       UNIFIED PAGINATION COMPONENT
+       ========================================= */
+    function renderPaginationControls({ current, total, onPrev, onNext, onJump, showPerPage }) {
+        paginationControls.innerHTML = '';
+
+        // 1. Pagination Wrapper (Prev | Input / Total | Next)
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pagination-wrapper';
+
+        // Prev Button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'nav-btn';
+        prevBtn.innerText = '← Prev';
+        prevBtn.disabled = current <= 1;
+        prevBtn.onclick = onPrev;
+
+        // Input Group
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'page-input-group';
+        
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'page-input';
+        input.value = current;
+        input.min = 1;
+        input.max = total;
+        
+        // Handle Input Change
+        const handleJump = () => {
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 1) val = 1;
+            if (val > total) val = total;
+            if (val !== current) onJump(val);
+            else input.value = val; // Reset visual if invalid
+        };
+        input.onblur = handleJump;
+        input.onkeydown = (e) => { if(e.key === 'Enter') handleJump(); };
+
+        inputGroup.appendChild(input);
+        inputGroup.appendChild(document.createTextNode(` / ${total}`));
+
+        // Next Button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'nav-btn';
+        nextBtn.innerText = 'Next →';
+        nextBtn.disabled = current >= total;
+        nextBtn.onclick = onNext;
+
+        wrapper.appendChild(prevBtn);
+        wrapper.appendChild(inputGroup);
+        wrapper.appendChild(nextBtn);
+
+        paginationControls.appendChild(wrapper);
+
+        // 2. Per Page Selector (Optional)
+        if (showPerPage) {
+            const ippWrapper = document.createElement('div');
+            ippWrapper.className = 'ipp-wrapper';
+            ippWrapper.innerHTML = `
+                <span>Show:</span>
+                <select id="ipp-select">
+                    <option value="10" ${state.itemsPerPage===10?'selected':''}>10</option>
+                    <option value="20" ${state.itemsPerPage===20?'selected':''}>20</option>
+                    <option value="30" ${state.itemsPerPage===30?'selected':''}>30</option>
+                </select>
+            `;
+            paginationControls.appendChild(ippWrapper);
+            
+            document.getElementById('ipp-select').addEventListener('change', (e) => {
+                state.itemsPerPage = parseInt(e.target.value);
+                state.page = 1; // Reset to page 1
+                render();
+            });
+        }
+    }
 
     /* =========================================
        RENDERING LOGIC
        ========================================= */
     function render() {
-        // 1. Fade Out Effect
         appContainer.style.opacity = '0';
-        paginationControls.innerHTML = '';
-
-        // 2. Render content after short delay for transition
+        
         setTimeout(() => {
             appContainer.className = `view-${state.view}`;
             appContainer.innerHTML = '';
 
             if (state.data.length === 0) {
                 appContainer.innerHTML = '<div style="text-align:center; padding:40px; color:#888;">데이터가 없습니다.</div>';
+                paginationControls.innerHTML = '';
             } else {
                 switch (state.view) {
                     case 'preview': renderPreview(); break;
@@ -523,8 +647,6 @@
                     case 'card': renderCard(); break;
                 }
             }
-
-            // 3. Fade In Effect
             appContainer.style.opacity = '1';
         }, 200);
     }
@@ -534,41 +656,19 @@
         const start = (state.page - 1) * state.itemsPerPage;
         const end = start + state.itemsPerPage;
         const pageItems = state.data.slice(start, end);
+        const totalPages = Math.ceil(state.data.length / state.itemsPerPage) || 1;
 
-        // Pagination Controls
-        const controlDiv = document.createElement('div');
-        controlDiv.className = 'ipp-wrapper';
-        controlDiv.innerHTML = `
-            <span>Items per page:</span>
-            <select id="ipp-select">
-                <option value="10" ${state.itemsPerPage===10?'selected':''}>10</option>
-                <option value="20" ${state.itemsPerPage===20?'selected':''}>20</option>
-                <option value="30" ${state.itemsPerPage===30?'selected':''}>30</option>
-            </select>
-        `;
-        paginationControls.appendChild(controlDiv);
-        
-        // Items Per Page Change Event
-        document.getElementById('ipp-select').addEventListener('change', (e) => {
-            state.itemsPerPage = parseInt(e.target.value);
-            state.page = 1; // Reset to first page
-            render();
+        // Render Pagination
+        renderPaginationControls({
+            current: state.page,
+            total: totalPages,
+            onPrev: () => { state.page--; render(); },
+            onNext: () => { state.page++; render(); },
+            onJump: (pageNum) => { state.page = pageNum; render(); },
+            showPerPage: true
         });
 
-        // Add Next/Prev Page Buttons if needed (Simplified for now)
-        if (state.data.length > state.itemsPerPage) {
-             const pageNav = document.createElement('div');
-             pageNav.style.marginLeft = '20px';
-             pageNav.className = 'page-info';
-             
-             const maxPage = Math.ceil(state.data.length / state.itemsPerPage);
-             pageNav.innerHTML = `Page ${state.page} / ${maxPage}`;
-             
-             // Simple Next/Prev buttons could be added here
-             paginationControls.appendChild(pageNav);
-        }
-
-        // Generate Cards
+        // Render Cards
         pageItems.forEach((item, idx) => {
             const realIdx = start + idx;
             const el = document.createElement('div');
@@ -584,9 +684,25 @@
         });
     }
 
-    // --- 2. List View Render ---
+    // --- 2. List View Render (Now with Pagination) ---
     function renderList() {
-        state.data.forEach(item => {
+        // Use same pagination logic as Preview
+        const start = (state.page - 1) * state.itemsPerPage;
+        const end = start + state.itemsPerPage;
+        const pageItems = state.data.slice(start, end);
+        const totalPages = Math.ceil(state.data.length / state.itemsPerPage) || 1;
+
+        // Render Pagination
+        renderPaginationControls({
+            current: state.page,
+            total: totalPages,
+            onPrev: () => { state.page--; render(); },
+            onNext: () => { state.page++; render(); },
+            onJump: (pageNum) => { state.page = pageNum; render(); },
+            showPerPage: true // Allows changing between 10, 20, 30 items
+        });
+
+        pageItems.forEach(item => {
             const el = document.createElement('div');
             el.className = 'card-list';
             
@@ -608,18 +724,21 @@
             };
             appContainer.appendChild(el);
         });
-        
-        // List View typically doesn't need complex pagination controls in this requirement, 
-        // but we can add a "Back to Top" or simple counter.
-        const info = document.createElement('div');
-        info.className = 'page-info';
-        info.innerText = `Total ${state.data.length} phrases`;
-        paginationControls.appendChild(info);
     }
 
     // --- 3. Card View Render ---
     function renderCard() {
         const item = state.data[state.currentIndex];
+        
+        // Render Pagination (Current is 1-based index for UI)
+        renderPaginationControls({
+            current: state.currentIndex + 1,
+            total: state.data.length,
+            onPrev: () => { state.currentIndex--; render(); },
+            onNext: () => { state.currentIndex++; render(); },
+            onJump: (cardNum) => { state.currentIndex = cardNum - 1; render(); },
+            showPerPage: false
+        });
         
         const wrapper = document.createElement('div');
         wrapper.className = 'card-single';
@@ -644,37 +763,6 @@
             wrapper.classList.toggle('flipped');
         };
         appContainer.appendChild(wrapper);
-
-        // Navigation Buttons
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'nav-btn';
-        prevBtn.innerHTML = '← Prev';
-        prevBtn.disabled = state.currentIndex === 0;
-        prevBtn.onclick = () => {
-            if(state.currentIndex > 0) {
-                state.currentIndex--;
-                render();
-            }
-        };
-
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'nav-btn';
-        nextBtn.innerHTML = 'Next →';
-        nextBtn.disabled = state.currentIndex === state.data.length - 1;
-        nextBtn.onclick = () => {
-            if(state.currentIndex < state.data.length - 1) {
-                state.currentIndex++;
-                render();
-            }
-        };
-
-        const counter = document.createElement('div');
-        counter.className = 'page-info';
-        counter.innerText = `${state.currentIndex + 1} / ${state.data.length}`;
-
-        paginationControls.appendChild(prevBtn);
-        paginationControls.appendChild(counter);
-        paginationControls.appendChild(nextBtn);
     }
 
     // --- Start App ---
