@@ -4,18 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>일본어 표현 학습</title>
+    <meta name="description" content="개인용 일본어 문장 학습 웹 어플리케이션">
     <style>
         :root {
+            /* Apple Style Colors */
             --bg-color: #f5f5f7;
             --card-bg: #ffffff;
-            --text-main: #333;
-            --text-sub: #666;
-            --accent: #007aff;
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --accent: #007aff; /* Apple Blue */
+            --border: #d2d2d7;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.08);
             --transition-speed: 0.3s;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             padding: 20px;
@@ -26,63 +31,100 @@
             min-height: 100vh;
         }
 
-        /* Header & Controls */
+        /* --- Header Area --- */
         header {
             width: 100%;
             max-width: 800px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            padding: 10px 0;
         }
 
+        /* View Select Dropdown */
         select {
-            padding: 8px 12px;
+            appearance: none;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            background: white;
+            padding: 8px 32px 8px 12px;
+            font-size: 15px;
+            color: var(--text-main);
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
-        /* Furigana Toggle Switch */
+        /* Furigana Toggle Wrapper */
+        .toggle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Custom Toggle Switch */
         .toggle-container {
             display: flex;
-            background: #e0e0e0;
+            background: #e5e5ea;
             border-radius: 20px;
             position: relative;
             cursor: pointer;
-            width: 100px;
-            height: 36px;
+            width: 90px;
+            height: 32px;
             align-items: center;
             justify-content: space-between;
-            padding: 0 5px;
+            padding: 0 4px;
             box-sizing: border-box;
+            transition: background-color 0.3s;
         }
 
         .toggle-bg {
             position: absolute;
             left: 2px;
             top: 2px;
-            width: 48px;
-            height: 32px;
+            width: 42px;
+            height: 28px;
             background: white;
             border-radius: 18px;
-            transition: transform var(--transition-speed) ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform var(--transition-speed) cubic-bezier(0.4, 0.0, 0.2, 1);
+            z-index: 1;
+        }
+
+        .toggle-container[data-state="on"] {
+            background-color: #dbeafe; /* Soft blue background */
         }
 
         .toggle-container[data-state="on"] .toggle-bg {
-            transform: translateX(48px);
+            transform: translateX(44px);
         }
 
         .toggle-label {
-            z-index: 1;
-            font-size: 12px;
-            font-weight: bold;
+            z-index: 2;
+            font-size: 11px;
+            font-weight: 700;
             flex: 1;
             text-align: center;
-            color: #888;
+            color: #999;
             transition: color var(--transition-speed);
+            user-select: none;
         }
 
         .toggle-container[data-state="off"] .label-off,
@@ -90,65 +132,83 @@
             color: var(--accent);
         }
 
-        /* Main Container */
+        /* --- Main App Container --- */
         #app-container {
             width: 100%;
             max-width: 800px;
+            flex: 1;
             transition: opacity 0.2s ease;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         /* View: Preview (Grid) */
         .view-preview {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
+            gap: 16px;
         }
 
         .card-preview {
             background: var(--card-bg);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
             cursor: pointer;
-            height: 80px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             overflow: hidden;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid transparent;
         }
-        .card-preview:hover { transform: translateY(-2px); }
-        .card-preview span {
-            white-space: nowrap;
+        .card-preview:hover { 
+            transform: translateY(-2px); 
+            box-shadow: var(--shadow-md);
+            border-color: rgba(0, 122, 255, 0.1);
+        }
+        .card-preview .text-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-height: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 100%;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
 
         /* View: List */
         .view-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
         }
 
         .card-list {
             background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
             cursor: pointer;
             text-align: center;
             font-size: 1.2rem;
-            transition: transform 0.3s;
-            perspective: 1000px;
+            transition: transform 0.2s, background-color 0.3s;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-list:hover {
+            transform: scale(1.005);
         }
         .card-list.flipped {
-            background: #eef4ff;
+            background-color: #f0f7ff;
             color: var(--accent);
         }
-
+        
         /* View: Card (Single) */
         .view-card {
             display: flex;
@@ -161,37 +221,15 @@
         .card-single {
             width: 100%;
             height: 100%;
-            background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            text-align: center;
-            padding: 20px;
-            cursor: pointer;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
+            background: transparent;
             position: relative;
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transform-style: preserve-3d;
         }
         
         .card-single.flipped {
             transform: rotateY(180deg);
-        }
-
-        .toggle-wrapper {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .toggle-title {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--text-sub);
-          letter-spacing: 0.5px;
         }
 
         .card-face {
@@ -202,59 +240,131 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* flex-direction: column; */
-            text-align: center;
-            padding: 20px;
+            padding: 40px;
             box-sizing: border-box;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow-md);
         }
 
-        .card-front {
-          line-height: 2.8;
-          font-weight: bold;
-        }
-
+        /* Back of card styling */
         .card-back {
             transform: rotateY(180deg);
-            background-color: #f0f8ff;
-            border-radius: 20px;
+            background-color: #f2f8ff; /* Very light blue */
+            border: 1px solid #e1ecff;
             color: var(--accent);
+            flex-direction: column;
         }
 
-        /* Navigation & Pagination */
+        /* Common Text Content Wrapper */
+        .text-content {
+            width: 100%;
+            text-align: center;
+            line-height: 1.6;
+            font-weight: 600;
+            word-break: keep-all; /* CJK line break rule */
+        }
+
+        /* Font Sizes per View */
+        .view-card .text-content { font-size: 1.8rem; }
+        .view-list .text-content { font-size: 1.3rem; }
+        .view-preview .text-content { font-size: 1rem; }
+
+        /* --- Controls & Pagination --- */
         .controls-area {
+            width: 100%;
+            max-width: 800px;
             margin-top: 20px;
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
             justify-content: center;
+            padding-bottom: 40px;
         }
+
         button.nav-btn {
             background: white;
-            border: 1px solid #ddd;
-            padding: 10px 20px;
+            border: 1px solid var(--border);
+            padding: 10px 24px;
             border-radius: 20px;
             cursor: pointer;
+            font-weight: 600;
+            color: var(--text-sub);
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+            font-size: 14px;
         }
-        button.nav-btn:disabled { opacity: 0.5; cursor: default; }
+        button.nav-btn:hover:not(:disabled) {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+        button.nav-btn:disabled { 
+            opacity: 0.4; 
+            cursor: default; 
+            background: #f0f0f0;
+            transform: none;
+            box-shadow: none;
+        }
 
-        /* Ruby Text Styling */
-        ruby { ruby-position: over; }
-        rt { font-size: 0.6em; color: var(--text-sub); }
+        .page-info {
+            font-size: 14px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
 
+        /* Pagination Per Page Select */
+        .ipp-wrapper {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+        .ipp-wrapper select {
+            margin-left: 8px;
+            padding: 4px 24px 4px 8px;
+            font-size: 13px;
+        }
+        
+        /* Spinner */
+        .spinner {
+            border: 3px solid #e5e5ea;
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
+            margin: 60px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .view-preview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .view-card .text-content {
+                font-size: 1.4rem;
+            }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <select id="view-select">
+    <!-- 1. View Switcher -->
+    <select id="view-select" aria-label="View Switcher">
         <option value="preview">Preview View</option>
         <option value="list">List View</option>
         <option value="card">Card View</option>
     </select>
 
+    <!-- 2. Furigana Toggle -->
     <div class="toggle-wrapper">
         <span class="toggle-title">Furigana</span>
-        <div class="toggle-container" id="furigana-toggle" data-state="off">
+        <div class="toggle-container" id="furigana-toggle" data-state="off" role="switch" aria-checked="false">
             <div class="toggle-bg"></div>
             <div class="toggle-label label-off">OFF</div>
             <div class="toggle-label label-on">ON</div>
@@ -263,138 +373,207 @@
 </header>
 
 <div id="app-container">
-    </div>
+    <div class="spinner"></div>
+</div>
 
 <div class="controls-area" id="pagination-controls">
-    </div>
+    <!-- Controls injected via JS -->
+</div>
 
 <script>
-    /**
-     * CONFIGURATION
-     * TODO: 여기에 생성한 Gist의 Raw URL을 넣어주세요.
-     */
-    const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/f374c1a71d80c3b18e30e2d5f791df3e38a44ebd/japanese_phrases.csv';
+    /* =========================================
+       CONFIGURATION
+       ========================================= */
+    const GIST_URL = 'https://gist.github.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/f374c1a71d80c3b18e30e2d5f791df3e38a44ebd/japanese_phrases.csv'; 
 
-    // State
+    // 기본 샘플 데이터 (Gist URL이 없을 때 사용됨)
+    const MOCK_DATA = `Meaning,Kanji,Furigana
+안녕하세요 / Hello,こんにちは,こんにちは
+일본어를 공부하고 있습니다 / I am studying Japanese,日本語を勉強しています,日本[にほん]語[ご]を勉強[べんきょう]しています
+역은 어디입니까? / Where is the station?,駅はどこですか？,駅[えき]はどこですか？
+이것은 매우 맛있네요 / This is very delicious,これはとても美味しいですね,これはとても美味[おい]しいですね
+만나서 반갑습니다 / Nice to meet you,初めまして、よろしくお願いします,初[はじ]めまして、よろしくお願[ねが]いします
+지금 몇 시입니까? / What time is it now?,今何時ですか？,今[いま]何[なん]時[じ]ですか？
+영화를 보는 것을 좋아합니다 / I like watching movies,映画を見るのが好きです,映画[えいが]を見[み]るのが好[す]きです
+잠시만 기다려 주세요 / Please wait a moment,少々お待ちください,少々[しょうしょう]お待[ま]ちください
+카드로 결제할 수 있나요? / Can I pay by card?,カードで支払えますか？,カードで支払[しはら]えますか？
+내일 날씨는 어떻습니까? / How is the weather tomorrow?,明日の天気はどうですか？,明日[あした]の天気[てんき]はどうですか？
+저의 취미는 독서입니다 / My hobby is reading,私の趣味は読書です,私[わたし]の趣味[しゅみ]は読書[どくしょ]です
+도와주셔서 감사합니다 / Thank you for your help,手伝ってくれてありがとうございます,手伝[てつだ]ってくれてありがとうございます
+이해하지 못했습니다 / I didn't understand,理解できませんでした,理解[りかい]できませんでした
+천천히 말해 주세요 / Please speak slowly,ゆっくり話してください,ゆっくり話[はな]してください
+화장실은 어디입니까? / Where is the restroom?,お手洗いはどこですか？,お手洗[てあら]いはどこですか？`;
+
+    /* =========================================
+       STATE MANAGEMENT
+       ========================================= */
     const state = {
         data: [],
-        view: 'preview', // preview, list, card
+        view: 'preview', // Options: 'preview', 'list', 'card'
         furigana: false,
         page: 1,
         itemsPerPage: 10,
-        currentIndex: 0 // for card view navigation
+        currentIndex: 0 // Used for Card View navigation
     };
 
-    // DOM Elements
+    /* =========================================
+       DOM ELEMENTS
+       ========================================= */
     const appContainer = document.getElementById('app-container');
     const viewSelect = document.getElementById('view-select');
     const furiganaToggle = document.getElementById('furigana-toggle');
     const paginationControls = document.getElementById('pagination-controls');
 
-    // Initialization
+    /* =========================================
+       INITIALIZATION
+       ========================================= */
     async function init() {
-        if(GIST_URL.includes('YOUR_USERNAME')) {
-            appContainer.innerHTML = '<p style="text-align:center">코드를 열어 GIST_URL을 설정해주세요.</p>';
+        // GIST URL이 유효하면 fetch 시도, 아니면 Mock Data 사용
+        if (GIST_URL && GIST_URL.startsWith('http')) {
+            try {
+                const response = await fetch(GIST_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const text = await response.text();
+                state.data = parseCSV(text);
+            } catch (e) {
+                console.warn("Gist loading failed, using mock data.", e);
+                state.data = parseCSV(MOCK_DATA);
+            }
+        } else {
+            // 로딩 효과 시뮬레이션
+            setTimeout(() => {
+                state.data = parseCSV(MOCK_DATA);
+                render();
+            }, 600);
             return;
         }
-
-        try {
-            const response = await fetch(GIST_URL);
-            const text = await response.text();
-            state.data = parseCSV(text);
-            render();
-        } catch (e) {
-            console.error(e);
-            appContainer.innerHTML = '<p style="text-align:center">데이터를 불러오는데 실패했습니다.</p>';
-        }
+        render();
     }
 
-    // CSV Parser
+    /* =========================================
+       HELPER FUNCTIONS
+       ========================================= */
+    
+    // CSV Parsing Logic
     function parseCSV(text) {
         const lines = text.trim().split('\n');
         const result = [];
-        // Skip header (index 0)
+        // Header(첫 줄) 건너뛰고 시작
         for(let i=1; i<lines.length; i++) {
-            // Simple CSV split (assumes no commas in fields for simplicity)
-            const [meaning, kanji, furigana] = lines[i].split(',');
-            if(meaning && kanji) {
+            // 쉼표로 구분하되, 문장 내 쉼표 오작동 방지를 위해 처음 2개의 쉼표만 찾음
+            const line = lines[i];
+            const firstComma = line.indexOf(',');
+            const secondComma = line.indexOf(',', firstComma + 1);
+            
+            if (firstComma > -1 && secondComma > -1) {
+                const meaning = line.substring(0, firstComma).trim();
+                const kanji = line.substring(firstComma + 1, secondComma).trim();
+                const furigana = line.substring(secondComma + 1).trim();
                 result.push({ meaning, kanji, furigana });
             }
         }
         return result;
     }
 
-    // Helper: Parse [ ] to Ruby tag
-    function parseFurigana(text) {
-        // Example: 日本[にほん] -> <ruby>日本<rt>にほん</rt></ruby>
-        return text.replace(/([\u4E00-\u9FAF\u3040-\u3096\u30A0-\u30FA]+)\[(.+?)\]/g, '<ruby>$1<rt>$2</rt></ruby>');
-    }
-
-    // Get Content based on Furigana State
+    // Get Display Text Logic
     function getDisplayHtml(item) {
         if (state.furigana) {
-            return parseFurigana(item.furigana || item.kanji);
+            // Furigana ON: 3번째 컬럼(괄호 포함) 그대로 표시
+            return item.furigana || item.kanji;
         }
+        // Furigana OFF: 2번째 컬럼(Kanji만) 표시
         return item.kanji;
     }
 
-    // Event Listeners
+    /* =========================================
+       EVENT LISTENERS
+       ========================================= */
     viewSelect.addEventListener('change', (e) => {
         state.view = e.target.value;
+        // 뷰 변경 시 페이지 초기화가 필요하면 state.page = 1; 추가
         render();
     });
 
     furiganaToggle.addEventListener('click', () => {
         state.furigana = !state.furigana;
         furiganaToggle.dataset.state = state.furigana ? 'on' : 'off';
-        render(); // Re-render to update text
+        furiganaToggle.setAttribute('aria-checked', state.furigana);
+        render(); // 텍스트 갱신을 위해 재렌더링
     });
 
-    // Main Render Function
+    /* =========================================
+       RENDERING LOGIC
+       ========================================= */
     function render() {
-        appContainer.style.opacity = '0'; // Fade out
+        // 1. Fade Out Effect
+        appContainer.style.opacity = '0';
         paginationControls.innerHTML = '';
 
+        // 2. Render content after short delay for transition
         setTimeout(() => {
             appContainer.className = `view-${state.view}`;
             appContainer.innerHTML = '';
 
-            if (state.view === 'preview') renderPreview();
-            else if (state.view === 'list') renderList();
-            else if (state.view === 'card') renderCard();
+            if (state.data.length === 0) {
+                appContainer.innerHTML = '<div style="text-align:center; padding:40px; color:#888;">데이터가 없습니다.</div>';
+            } else {
+                switch (state.view) {
+                    case 'preview': renderPreview(); break;
+                    case 'list': renderList(); break;
+                    case 'card': renderCard(); break;
+                }
+            }
 
-            appContainer.style.opacity = '1'; // Fade in
-        }, 150);
+            // 3. Fade In Effect
+            appContainer.style.opacity = '1';
+        }, 200);
     }
 
-    // 1. Preview View
+    // --- 1. Preview View Render ---
     function renderPreview() {
-        // Pagination logic
         const start = (state.page - 1) * state.itemsPerPage;
         const end = start + state.itemsPerPage;
         const pageItems = state.data.slice(start, end);
 
-        // Slider for items per page
-        const sliderHtml = `
-            <label>Items: <select id="ipp-select">
-                <option value="10" ${state.itemsPerPage==10?'selected':''}>10</option>
-                <option value="20" ${state.itemsPerPage==20?'selected':''}>20</option>
-                <option value="30" ${state.itemsPerPage==30?'selected':''}>30</option>
-            </select></label>
+        // Pagination Controls
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ipp-wrapper';
+        controlDiv.innerHTML = `
+            <span>Items per page:</span>
+            <select id="ipp-select">
+                <option value="10" ${state.itemsPerPage===10?'selected':''}>10</option>
+                <option value="20" ${state.itemsPerPage===20?'selected':''}>20</option>
+                <option value="30" ${state.itemsPerPage===30?'selected':''}>30</option>
+            </select>
         `;
-        paginationControls.innerHTML = sliderHtml;
+        paginationControls.appendChild(controlDiv);
+        
+        // Items Per Page Change Event
         document.getElementById('ipp-select').addEventListener('change', (e) => {
             state.itemsPerPage = parseInt(e.target.value);
-            state.page = 1;
+            state.page = 1; // Reset to first page
             render();
         });
 
+        // Add Next/Prev Page Buttons if needed (Simplified for now)
+        if (state.data.length > state.itemsPerPage) {
+             const pageNav = document.createElement('div');
+             pageNav.style.marginLeft = '20px';
+             pageNav.className = 'page-info';
+             
+             const maxPage = Math.ceil(state.data.length / state.itemsPerPage);
+             pageNav.innerHTML = `Page ${state.page} / ${maxPage}`;
+             
+             // Simple Next/Prev buttons could be added here
+             paginationControls.appendChild(pageNav);
+        }
+
+        // Generate Cards
         pageItems.forEach((item, idx) => {
             const realIdx = start + idx;
             const el = document.createElement('div');
             el.className = 'card-preview';
-            // Preview: Only Japanese, overflow hidden
-            el.innerHTML = `<span>${getDisplayHtml(item)}</span>`;
+            el.innerHTML = `<div class="text-content">${getDisplayHtml(item)}</div>`;
             el.onclick = () => {
                 state.currentIndex = realIdx;
                 state.view = 'card';
@@ -405,51 +584,71 @@
         });
     }
 
-    // 2. List View
+    // --- 2. List View Render ---
     function renderList() {
         state.data.forEach(item => {
             const el = document.createElement('div');
             el.className = 'card-list';
-            const jpText = getDisplayHtml(item);
             
-            el.innerHTML = `<div>${jpText}</div>`;
+            const jpContent = `<div class="text-content">${getDisplayHtml(item)}</div>`;
+            const meaningContent = `<div class="text-content" style="color:var(--accent); font-weight:500;">${item.meaning}</div>`;
+            
+            el.innerHTML = jpContent;
             
             let isFlipped = false;
             el.onclick = () => {
                 isFlipped = !isFlipped;
                 if(isFlipped) {
                     el.classList.add('flipped');
-                    el.innerText = item.meaning;
+                    el.innerHTML = meaningContent;
                 } else {
                     el.classList.remove('flipped');
-                    el.innerHTML = `<div>${jpText}</div>`;
+                    el.innerHTML = jpContent;
                 }
             };
             appContainer.appendChild(el);
         });
+        
+        // List View typically doesn't need complex pagination controls in this requirement, 
+        // but we can add a "Back to Top" or simple counter.
+        const info = document.createElement('div');
+        info.className = 'page-info';
+        info.innerText = `Total ${state.data.length} phrases`;
+        paginationControls.appendChild(info);
     }
 
-    // 3. Card View
+    // --- 3. Card View Render ---
     function renderCard() {
         const item = state.data[state.currentIndex];
         
         const wrapper = document.createElement('div');
         wrapper.className = 'card-single';
         
-        const front = `<div class="card-face card-front">${getDisplayHtml(item)}</div>`;
-        const back = `<div class="card-face card-back">${item.meaning}</div>`;
+        // Front Face
+        const front = `
+            <div class="card-face card-front">
+                <div class="text-content">${getDisplayHtml(item)}</div>
+            </div>`;
+        
+        // Back Face
+        const back = `
+            <div class="card-face card-back">
+                <div class="text-content" style="font-size: 1.5rem; margin-bottom: 10px;">${item.meaning}</div>
+                <div style="font-size: 0.85rem; opacity: 0.6; font-weight: 400;">(Tap to flip back)</div>
+            </div>`;
         
         wrapper.innerHTML = front + back;
         
+        // Flip Logic
         wrapper.onclick = () => {
             wrapper.classList.toggle('flipped');
         };
         appContainer.appendChild(wrapper);
 
-        // Nav Buttons
+        // Navigation Buttons
         const prevBtn = document.createElement('button');
         prevBtn.className = 'nav-btn';
-        prevBtn.innerText = '← Prev';
+        prevBtn.innerHTML = '← Prev';
         prevBtn.disabled = state.currentIndex === 0;
         prevBtn.onclick = () => {
             if(state.currentIndex > 0) {
@@ -460,7 +659,7 @@
 
         const nextBtn = document.createElement('button');
         nextBtn.className = 'nav-btn';
-        nextBtn.innerText = 'Next →';
+        nextBtn.innerHTML = 'Next →';
         nextBtn.disabled = state.currentIndex === state.data.length - 1;
         nextBtn.onclick = () => {
             if(state.currentIndex < state.data.length - 1) {
@@ -469,14 +668,18 @@
             }
         };
 
+        const counter = document.createElement('div');
+        counter.className = 'page-info';
+        counter.innerText = `${state.currentIndex + 1} / ${state.data.length}`;
+
         paginationControls.appendChild(prevBtn);
+        paginationControls.appendChild(counter);
         paginationControls.appendChild(nextBtn);
     }
 
-    // Start
+    // --- Start App ---
     init();
 
 </script>
 </body>
 </html>
-
