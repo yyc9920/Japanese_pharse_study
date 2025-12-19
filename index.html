@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일본어 표현 학습</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --text-sub: #666;
+            --accent: #007aff;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header & Controls */
+        header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            background: white;
+        }
+
+        /* Furigana Toggle Switch */
+        .toggle-container {
+            display: flex;
+            background: #e0e0e0;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            width: 100px;
+            height: 36px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5px;
+            box-sizing: border-box;
+        }
+
+        .toggle-bg {
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: 48px;
+            height: 32px;
+            background: white;
+            border-radius: 18px;
+            transition: transform var(--transition-speed) ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .toggle-container[data-state="on"] .toggle-bg {
+            transform: translateX(48px);
+        }
+
+        .toggle-label {
+            z-index: 1;
+            font-size: 12px;
+            font-weight: bold;
+            flex: 1;
+            text-align: center;
+            color: #888;
+            transition: color var(--transition-speed);
+        }
+
+        .toggle-container[data-state="off"] .label-off,
+        .toggle-container[data-state="on"] .label-on {
+            color: var(--accent);
+        }
+
+        /* Main Container */
+        #app-container {
+            width: 100%;
+            max-width: 800px;
+            transition: opacity 0.2s ease;
+        }
+
+        /* View: Preview (Grid) */
+        .view-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .card-preview {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .card-preview:hover { transform: translateY(-2px); }
+        .card-preview span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        /* View: List */
+        .view-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card-list {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            text-align: center;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            perspective: 1000px;
+        }
+        .card-list.flipped {
+            background: #eef4ff;
+            color: var(--accent);
+        }
+
+        /* View: Card (Single) */
+        .view-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            perspective: 1000px;
+        }
+
+        .card-single {
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            text-align: center;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        
+        .card-single.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #f0f8ff;
+            border-radius: 20px;
+            color: var(--accent);
+        }
+
+        /* Navigation & Pagination */
+        .controls-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        button.nav-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        button.nav-btn:disabled { opacity: 0.5; cursor: default; }
+
+        /* Ruby Text Styling */
+        ruby { ruby-position: over; }
+        rt { font-size: 0.6em; color: var(--text-sub); }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <select id="view-select">
+        <option value="preview">Preview View</option>
+        <option value="list">List View</option>
+        <option value="card">Card View</option>
+    </select>
+
+    <div class="toggle-container" id="furigana-toggle" data-state="off">
+        <div class="toggle-bg"></div>
+        <div class="toggle-label label-off">OFF</div>
+        <div class="toggle-label label-on">ON</div>
+    </div>
+</header>
+
+<div id="app-container">
+    </div>
+
+<div class="controls-area" id="pagination-controls">
+    </div>
+
+<script>
+    /**
+     * CONFIGURATION
+     * TODO: 여기에 생성한 Gist의 Raw URL을 넣어주세요.
+     */
+    const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/f374c1a71d80c3b18e30e2d5f791df3e38a44ebd/japanese_phrases.csv';
+
+    // State
+    const state = {
+        data: [],
+        view: 'preview', // preview, list, card
+        furigana: false,
+        page: 1,
+        itemsPerPage: 10,
+        currentIndex: 0 // for card view navigation
+    };
+
+    // DOM Elements
+    const appContainer = document.getElementById('app-container');
+    const viewSelect = document.getElementById('view-select');
+    const furiganaToggle = document.getElementById('furigana-toggle');
+    const paginationControls = document.getElementById('pagination-controls');
+
+    // Initialization
+    async function init() {
+        if(GIST_URL.includes('YOUR_USERNAME')) {
+            appContainer.innerHTML = '<p style="text-align:center">코드를 열어 GIST_URL을 설정해주세요.</p>';
+            return;
+        }
+
+        try {
+            const response = await fetch(GIST_URL);
+            const text = await response.text();
+            state.data = parseCSV(text);
+            render();
+        } catch (e) {
+            console.error(e);
+            appContainer.innerHTML = '<p style="text-align:center">데이터를 불러오는데 실패했습니다.</p>';
+        }
+    }
+
+    // CSV Parser
+    function parseCSV(text) {
+        const lines = text.trim().split('\n');
+        const result = [];
+        // Skip header (index 0)
+        for(let i=1; i<lines.length; i++) {
+            // Simple CSV split (assumes no commas in fields for simplicity)
+            const [meaning, kanji, furigana] = lines[i].split(',');
+            if(meaning && kanji) {
+                result.push({ meaning, kanji, furigana });
+            }
+        }
+        return result;
+    }
+
+    // Helper: Parse [ ] to Ruby tag
+    function parseFurigana(text) {
+        // Example: 日本[にほん] -> <ruby>日本<rt>にほん</rt></ruby>
+        return text.replace(/([\u4E00-\u9FAF\u3040-\u3096\u30A0-\u30FA]+)\[(.+?)\]/g, '<ruby>$1<rt>$2</rt></ruby>');
+    }
+
+    // Get Content based on Furigana State
+    function getDisplayHtml(item) {
+        if (state.furigana) {
+            return parseFurigana(item.furigana || item.kanji);
+        }
+        return item.kanji;
+    }
+
+    // Event Listeners
+    viewSelect.addEventListener('change', (e) => {
+        state.view = e.target.value;
+        render();
+    });
+
+    furiganaToggle.addEventListener('click', () => {
+        state.furigana = !state.furigana;
+        furiganaToggle.dataset.state = state.furigana ? 'on' : 'off';
+        render(); // Re-render to update text
+    });
+
+    // Main Render Function
+    function render() {
+        appContainer.style.opacity = '0'; // Fade out
+        paginationControls.innerHTML = '';
+
+        setTimeout(() => {
+            appContainer.className = `view-${state.view}`;
+            appContainer.innerHTML = '';
+
+            if (state.view === 'preview') renderPreview();
+            else if (state.view === 'list') renderList();
+            else if (state.view === 'card') renderCard();
+
+            appContainer.style.opacity = '1'; // Fade in
+        }, 150);
+    }
+
+    // 1. Preview View
+    function renderPreview() {
+        // Pagination logic
+        const start = (state.page - 1) * state.itemsPerPage;
+        const end = start + state.itemsPerPage;
+        const pageItems = state.data.slice(start, end);
+
+        // Slider for items per page
+        const sliderHtml = `
+            <label>Items: <select id="ipp-select">
+                <option value="10" ${state.itemsPerPage==10?'selected':''}>10</option>
+                <option value="20" ${state.itemsPerPage==20?'selected':''}>20</option>
+                <option value="30" ${state.itemsPerPage==30?'selected':''}>30</option>
+            </select></label>
+        `;
+        paginationControls.innerHTML = sliderHtml;
+        document.getElementById('ipp-select').addEventListener('change', (e) => {
+            state.itemsPerPage = parseInt(e.target.value);
+            state.page = 1;
+            render();
+        });
+
+        pageItems.forEach((item, idx) => {
+            const realIdx = start + idx;
+            const el = document.createElement('div');
+            el.className = 'card-preview';
+            // Preview: Only Japanese, overflow hidden
+            el.innerHTML = `<span>${getDisplayHtml(item)}</span>`;
+            el.onclick = () => {
+                state.currentIndex = realIdx;
+                state.view = 'card';
+                viewSelect.value = 'card';
+                render();
+            };
+            appContainer.appendChild(el);
+        });
+    }
+
+    // 2. List View
+    function renderList() {
+        state.data.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'card-list';
+            const jpText = getDisplayHtml(item);
+            
+            el.innerHTML = `<div>${jpText}</div>`;
+            
+            let isFlipped = false;
+            el.onclick = () => {
+                isFlipped = !isFlipped;
+                if(isFlipped) {
+                    el.classList.add('flipped');
+                    el.innerText = item.meaning;
+                } else {
+                    el.classList.remove('flipped');
+                    el.innerHTML = `<div>${jpText}</div>`;
+                }
+            };
+            appContainer.appendChild(el);
+        });
+    }
+
+    // 3. Card View
+    function renderCard() {
+        const item = state.data[state.currentIndex];
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'card-single';
+        
+        const front = `<div class="card-face card-front">${getDisplayHtml(item)}</div>`;
+        const back = `<div class="card-face card-back">${item.meaning}</div>`;
+        
+        wrapper.innerHTML = front + back;
+        
+        wrapper.onclick = () => {
+            wrapper.classList.toggle('flipped');
+        };
+        appContainer.appendChild(wrapper);
+
+        // Nav Buttons
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'nav-btn';
+        prevBtn.innerText = '← Prev';
+        prevBtn.disabled = state.currentIndex === 0;
+        prevBtn.onclick = () => {
+            if(state.currentIndex > 0) {
+                state.currentIndex--;
+                render();
+            }
+        };
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'nav-btn';
+        nextBtn.innerText = 'Next →';
+        nextBtn.disabled = state.currentIndex === state.data.length - 1;
+        nextBtn.onclick = () => {
+            if(state.currentIndex < state.data.length - 1) {
+                state.currentIndex++;
+                render();
+            }
+        };
+
+        paginationControls.appendChild(prevBtn);
+        paginationControls.appendChild(nextBtn);
+    }
+
+    // Start
+    init();
+
+</script>
+</body>
+</html>
+
