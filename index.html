@@ -180,6 +180,20 @@
             transform: rotateY(180deg);
         }
 
+        .toggle-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .toggle-title {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: var(--text-sub);
+          letter-spacing: 0.5px;
+        }
+
         .card-face {
             position: absolute;
             width: 100%;
@@ -188,7 +202,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
+            /* flex-direction: column; */
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card-front {
+          line-height: 2.8;
+          font-weight: bold;
         }
 
         .card-back {
@@ -230,10 +252,13 @@
         <option value="card">Card View</option>
     </select>
 
-    <div class="toggle-container" id="furigana-toggle" data-state="off">
-        <div class="toggle-bg"></div>
-        <div class="toggle-label label-off">OFF</div>
-        <div class="toggle-label label-on">ON</div>
+    <div class="toggle-wrapper">
+        <span class="toggle-title">Furigana</span>
+        <div class="toggle-container" id="furigana-toggle" data-state="off">
+            <div class="toggle-bg"></div>
+            <div class="toggle-label label-off">OFF</div>
+            <div class="toggle-label label-on">ON</div>
+        </div>
     </div>
 </header>
 
