@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>일본어 표현 학습</title>
     <meta name="description" content="개인용 일본어 문장 학습 웹 어플리케이션">
-    <!-- Favicon -->
+    
+    <!-- Favicon (Browser Tab) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+    <!-- Apple Touch Icon (iPhone Home Screen) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23007aff%22 rx=%2220%22 ry=%2220%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2260%22>📖</text></svg>">
     
     <style>
         :root {
@@ -204,7 +207,18 @@
         /* View Styles */
         .view-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
         .view-list { display: flex; flex-direction: column; gap: 16px; }
-        .view-card { display: flex; align-items: center; justify-content: center; height: 400px; perspective: 1000px; overflow: hidden; }
+        
+        /* View: Card (Fixed sizing issue) */
+        .view-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 500px; /* Increased base height */
+            min-height: 50vh;
+            perspective: 1000px;
+            overflow: visible; /* Allow shadow/content to be seen */
+            padding: 20px 0;
+        }
 
         /* Card Common */
         .card-preview, .card-list {
@@ -221,9 +235,10 @@
         .card-list { padding: 24px; min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; }
         .card-list.flipped { background-color: rgba(0, 122, 255, 0.05); color: var(--accent); }
 
-        /* Single Card */
+        /* Single Card (Sizing Fix) */
         .card-single {
             width: 100%;
+            max-width: 500px; /* Added max-width for PC readability */
             height: 100%;
             background: transparent;
             position: relative;
@@ -234,6 +249,7 @@
         }
         .card-single:active { cursor: grabbing; }
         .card-single.flipped { transform: rotateY(180deg); }
+        
         .card-face {
             position: absolute;
             width: 100%;
@@ -243,40 +259,57 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 30px;
+            padding: 40px; /* Increased padding */
             box-sizing: border-box;
             background: var(--card-bg);
             border-radius: 24px;
             box-shadow: var(--shadow-md);
-            overflow-y: auto;
+            /* Important: Scrollbar for long text */
+            overflow-y: auto; 
             user-select: none;
         }
         .card-back { transform: rotateY(180deg); background-color: var(--card-bg); border: 2px solid var(--accent); color: var(--accent); }
 
         /* Text Content */
-        .text-content { width: 100%; text-align: center; font-weight: 600; word-wrap: break-word; white-space: normal; color: var(--text-main); }
-        .view-card .text-content { font-size: 1.6rem; line-height: 1.5; }
+        .text-content { 
+            width: 100%; 
+            text-align: center; 
+            font-weight: 600; 
+            word-wrap: break-word; 
+            white-space: normal; 
+            color: var(--text-main);
+            /* Ensure text doesn't overflow horizontally */
+            overflow-wrap: break-word; 
+        }
+        
+        /* Font Sizes */
+        .view-card .text-content { 
+            font-size: 1.8rem; /* Larger font */
+            line-height: 1.6; 
+        }
         .view-preview .text-content { font-size: 0.95rem; line-height: 1.5; }
         .view-list .text-content { font-size: 1.3rem; line-height: 1.5; }
         .card-back .text-content { color: var(--accent); }
 
         /* TTS Button */
         .tts-btn {
-            margin-top: 20px;
-            background: transparent;
-            border: none;
+            margin-top: 30px;
+            background: var(--bg-color); /* Visible button background */
+            border: 1px solid var(--border);
             cursor: pointer;
             font-size: 1.5rem;
-            color: var(--text-sub);
-            transition: color 0.2s, transform 0.1s;
+            color: var(--text-main);
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
+            box-shadow: var(--shadow-sm);
         }
-        .tts-btn:hover { color: var(--accent); background-color: rgba(0,0,0,0.05); }
-        .tts-btn:active { transform: scale(0.9); }
+        .tts-btn:hover { color: var(--accent); transform: scale(1.05); }
+        .tts-btn:active { transform: scale(0.95); }
 
         /* Quiz View */
         .view-quiz { display: flex; flex-direction: column; align-items: center; width: 100%; }
@@ -365,6 +398,10 @@
 
         @media (max-width: 600px) {
             .view-preview { grid-template-columns: repeat(2, 1fr); }
+            /* Mobile Adjustment for Card View */
+            .view-card { height: 400px; }
+            .view-card .text-content { font-size: 1.4rem; }
+            
             .quiz-controls { flex-direction: column; align-items: flex-start; }
             .quiz-range-info { margin-left: 0; margin-top: 5px; }
         }
