@@ -5,18 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>일본어 표현 학습</title>
     <meta name="description" content="개인용 일본어 문장 학습 웹 어플리케이션">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+    
     <style>
         :root {
-            /* Apple Style Colors */
+            /* Light Mode Variables */
             --bg-color: #f5f5f7;
             --card-bg: #ffffff;
             --text-main: #1d1d1f;
             --text-sub: #86868b;
-            --accent: #007aff; /* Apple Blue */
+            --accent: #007aff;
+            --error: #ff3b30;
+            --success: #34c759;
             --border: #d2d2d7;
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.08);
+            --progress-bg: #e0e0e0;
             --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Mode Variables */
+            --bg-color: #1c1c1e;
+            --card-bg: #2c2c2e;
+            --text-main: #f5f5f7;
+            --text-sub: #aeaeb2;
+            --accent: #0a84ff;
+            --error: #ff453a;
+            --success: #32d74b;
+            --border: #38383a;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.3);
+            --progress-bg: #3a3a3c;
         }
 
         body {
@@ -29,8 +50,9 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden; /* 가로 스크롤 방지 */
-            overscroll-behavior-y: none; /* 모바일 당겨서 새로고침 방지 (앱 느낌) */
+            overflow-x: hidden;
+            overscroll-behavior-y: none;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
         }
 
         /* --- Header Area --- */
@@ -40,11 +62,35 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             padding: 10px 0;
+            position: relative;
+            z-index: 10;
         }
 
-        /* Select Elements */
+        .header-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s;
+        }
+        .theme-toggle:active { transform: scale(0.9); }
+
         select {
             appearance: none;
             background-color: var(--card-bg);
@@ -60,78 +106,89 @@
             background-size: 16px;
             box-shadow: var(--shadow-sm);
         }
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
+        select:focus { outline: none; border-color: var(--accent); }
 
-        /* Furigana Toggle Wrapper */
+        /* Furigana Toggle */
         .toggle-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
-
         .toggle-title {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
             color: var(--text-sub);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        /* Custom Toggle Switch */
         .toggle-container {
             display: flex;
-            background: #e5e5ea;
+            background: var(--border); /* Better contrast in dark mode */
             border-radius: 20px;
             position: relative;
             cursor: pointer;
-            width: 90px;
-            height: 32px;
+            width: 80px;
+            height: 30px;
             align-items: center;
             justify-content: space-between;
             padding: 0 4px;
             box-sizing: border-box;
             transition: background-color 0.3s;
         }
-
         .toggle-bg {
             position: absolute;
             left: 2px;
             top: 2px;
-            width: 42px;
-            height: 28px;
-            background: white;
+            width: 38px;
+            height: 26px;
+            background: var(--card-bg);
             border-radius: 18px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
             transition: transform var(--transition-speed) cubic-bezier(0.4, 0.0, 0.2, 1);
             z-index: 1;
         }
-
-        .toggle-container[data-state="on"] {
-            background-color: #dbeafe;
-        }
-
-        .toggle-container[data-state="on"] .toggle-bg {
-            transform: translateX(44px);
-        }
-
+        .toggle-container[data-state="on"] { background-color: var(--accent); }
+        .toggle-container[data-state="on"] .toggle-bg { transform: translateX(38px); }
         .toggle-label {
             z-index: 2;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             flex: 1;
             text-align: center;
-            color: #999;
+            color: var(--text-sub);
             transition: color var(--transition-speed);
             user-select: none;
         }
+        .toggle-container[data-state="on"] .label-on { color: var(--accent); }
+        .toggle-container[data-state="on"] .label-off { color: rgba(255,255,255,0.8); }
+        .toggle-container[data-state="off"] .label-on { color: var(--text-sub); }
+        .toggle-container[data-state="off"] .label-off { color: var(--text-main); }
 
-        .toggle-container[data-state="off"] .label-off,
-        .toggle-container[data-state="on"] .label-on {
-            color: var(--accent);
+        /* --- Progress Bar --- */
+        .progress-container {
+            width: 100%;
+            max-width: 800px;
+            height: 6px;
+            background-color: var(--progress-bg);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .progress-text {
+            position: absolute;
+            right: 0;
+            top: -20px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            font-weight: 600;
         }
 
         /* --- Main App Container --- */
@@ -144,99 +201,46 @@
             position: relative;
         }
 
-        /* View: Preview (Grid) */
-        .view-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 16px;
-        }
+        /* View Styles */
+        .view-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+        .view-list { display: flex; flex-direction: column; gap: 16px; }
+        .view-card { display: flex; align-items: center; justify-content: center; height: 400px; perspective: 1000px; overflow: hidden; }
 
-        .card-preview {
+        /* Card Common */
+        .card-preview, .card-list {
             background: var(--card-bg);
-            padding: 20px;
             border-radius: 16px;
             box-shadow: var(--shadow-sm);
             cursor: pointer;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
             border: 1px solid transparent;
         }
-        .card-preview:hover { 
-            transform: translateY(-2px); 
-            box-shadow: var(--shadow-md);
-            border-color: rgba(0, 122, 255, 0.1);
-        }
+        .card-preview:hover, .card-list:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: rgba(0, 122, 255, 0.1); }
 
-        /* View: List */
-        .view-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        .card-preview { height: 100px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; padding: 20px; }
+        .card-list { padding: 24px; min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .card-list.flipped { background-color: rgba(0, 122, 255, 0.05); color: var(--accent); }
 
-        .card-list {
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-sm);
-            cursor: pointer;
-            text-align: center;
-            font-size: 1.2rem;
-            transition: transform 0.2s, background-color 0.3s;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .card-list:hover { transform: scale(1.005); }
-        .card-list.flipped {
-            background-color: #f0f7ff;
-            color: var(--accent);
-        }
-        .card-list .text-content {
-            font-size: 1.3rem;
-            white-space: normal;
-            word-wrap: break-word;
-            line-height: 1.5;
-        }
-
-        /* View: Card (Single) */
-        .view-card {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 400px;
-            perspective: 1000px;
-            overflow: hidden; /* 카드가 날아갈 때 가로 스크롤 방지 */
-        }
-
+        /* Single Card */
         .card-single {
             width: 100%;
             height: 100%;
             background: transparent;
             position: relative;
-            cursor: grab; /* 마우스 커서 변경 */
-            transition: transform 0.3s ease; /* 기본 트랜지션 */
+            cursor: grab;
+            transition: transform 0.3s ease;
             transform-style: preserve-3d;
-            touch-action: pan-y; /* 수평 스크롤은 JS로 제어, 수직은 허용 */
+            touch-action: pan-y;
         }
         .card-single:active { cursor: grabbing; }
-        
-        .card-single.flipped {
-            transform: rotateY(180deg);
-        }
-
+        .card-single.flipped { transform: rotateY(180deg); }
         .card-face {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 30px;
@@ -245,145 +249,150 @@
             border-radius: 24px;
             box-shadow: var(--shadow-md);
             overflow-y: auto;
-            user-select: none; /* 텍스트 선택 방지 (드래그 시 불편함 방지) */
+            user-select: none;
         }
+        .card-back { transform: rotateY(180deg); background-color: var(--card-bg); border: 2px solid var(--accent); color: var(--accent); }
 
-        .card-back {
-            transform: rotateY(180deg);
-            background-color: #f2f8ff;
-            border: 1px solid #e1ecff;
-            color: var(--accent);
-            flex-direction: column;
-        }
-
-        /* Common Text Content Wrapper */
-        .text-content {
-            width: 100%;
-            text-align: center;
-            font-weight: 600;
-            word-wrap: break-word;
-            white-space: normal;
-        }
+        /* Text Content */
+        .text-content { width: 100%; text-align: center; font-weight: 600; word-wrap: break-word; white-space: normal; color: var(--text-main); }
         .view-card .text-content { font-size: 1.6rem; line-height: 1.5; }
         .view-preview .text-content { font-size: 0.95rem; line-height: 1.5; }
+        .view-list .text-content { font-size: 1.3rem; line-height: 1.5; }
+        .card-back .text-content { color: var(--accent); }
 
-        /* --- Unified Pagination Controls --- */
-        .controls-area {
-            width: 100%;
-            max-width: 800px;
+        /* TTS Button */
+        .tts-btn {
             margin-top: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-sub);
+            transition: color 0.2s, transform 0.1s;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-bottom: 40px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .pagination-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--card-bg);
-            padding: 8px 16px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        button.nav-btn {
-            background: white;
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-sub);
-            transition: all 0.2s;
-            font-size: 14px;
-            white-space: nowrap;
-            min-width: 80px;
-        }
-        button.nav-btn:hover:not(:disabled) {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-            transform: translateY(-1px);
-        }
-        button.nav-btn:disabled { 
-            opacity: 0.4; 
-            cursor: default; 
-            background: #f9f9f9;
-            transform: none;
-        }
-
-        .page-input-group {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: var(--text-sub);
-            font-weight: 500;
-        }
-
-        .page-input {
-            width: 40px;
-            text-align: center;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 4px;
-            margin-right: 6px;
-            font-size: 14px;
-            color: var(--text-main);
-            font-weight: 600;
-        }
-        .page-input:focus { outline: none; border-color: var(--accent); }
-
-        .ipp-wrapper {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: var(--text-sub);
-            background: var(--card-bg);
-            padding: 8px 12px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
-        }
-        .ipp-wrapper select {
-            margin-left: 8px;
-            padding: 4px 24px 4px 8px;
-            font-size: 13px;
-            border: none;
-            background-color: transparent;
-            box-shadow: none;
-        }
-        
-        .spinner {
-            border: 3px solid #e5e5ea;
-            border-top: 3px solid var(--accent);
+            padding: 10px;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 0.8s linear infinite;
-            margin: 60px auto;
         }
+        .tts-btn:hover { color: var(--accent); background-color: rgba(0,0,0,0.05); }
+        .tts-btn:active { transform: scale(0.9); }
+
+        /* Quiz View */
+        .view-quiz { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .quiz-controls-wrapper { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; width: 100%; max-width: 600px; }
+        .quiz-controls {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--card-bg); padding: 12px 16px; border-radius: 12px; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 10px;
+        }
+        .quiz-controls label { font-size: 0.9rem; color: var(--text-sub); font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 6px;}
+        .quiz-controls select { padding: 6px 24px 6px 10px; font-size: 0.9rem; border: none; box-shadow: none; background-color: transparent; cursor: pointer; color: var(--text-main); }
+        .quiz-range-input {
+            border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; width: 100px; text-align: center;
+            background: var(--bg-color); color: var(--text-main);
+        }
+        .quiz-range-info { font-size: 0.85rem; color: var(--accent); margin-left: auto; font-weight: 600; }
+
+        .quiz-card {
+            background: var(--card-bg); width: 100%; padding: 40px 30px; border-radius: 24px; box-shadow: var(--shadow-md);
+            box-sizing: border-box; text-align: center; display: flex; flex-direction: column; gap: 24px; animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .quiz-context { font-size: 0.95rem; color: var(--text-sub); margin-bottom: -15px; }
+        .quiz-question {
+            font-size: 1.5rem; font-weight: bold; color: var(--text-main); line-height: 1.5; min-height: 60px;
+            display: flex; align-items: center; justify-content: center; word-wrap: break-word; white-space: pre-wrap;
+        }
+        .quiz-input {
+            width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1.1rem;
+            text-align: center; outline: none; background: var(--bg-color); color: var(--text-main); transition: border-color 0.2s; box-sizing: border-box;
+        }
+        .quiz-input:focus { border-color: var(--accent); }
+        .quiz-check-btn {
+            width: 100%; background-color: var(--accent); color: white; border: none; padding: 14px; border-radius: 12px;
+            font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 15px;
+        }
+        .quiz-feedback { margin-top: 10px; padding: 20px; border-radius: 12px; font-size: 1rem; line-height: 1.6; text-align: left; width: 100%; box-sizing: border-box; display: none; }
+        .quiz-feedback.success { background-color: rgba(52, 199, 89, 0.1); color: var(--success); border: 1px solid var(--success); text-align: center; font-weight: bold; }
+        .quiz-feedback.error { background-color: rgba(255, 59, 48, 0.1); color: var(--text-main); border: 1px solid var(--error); }
+        
+        .diff-wrong { color: var(--error); text-decoration: line-through; margin-right: 6px; font-weight: bold;}
+        .diff-correct { color: var(--success); font-weight: bold; }
+        .quiz-meta-info { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); font-size: 0.95rem; color: var(--text-sub); text-align: center; }
+        .quiz-furigana-hint { color: var(--accent); font-weight: 600; font-size: 1rem; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        .quiz-next-btn {
+            margin-top: 20px; background-color: var(--text-main); color: var(--card-bg); border: none; padding: 12px 24px;
+            border-radius: 30px; font-size: 0.95rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: inline-block;
+        }
+
+        /* Pagination */
+        .controls-area { width: 100%; max-width: 800px; margin-top: 20px; display: flex; align-items: center; justify-content: center; padding-bottom: 40px; flex-wrap: wrap; gap: 12px; }
+        .pagination-wrapper { display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 8px 16px; border-radius: 12px; box-shadow: var(--shadow-sm); }
+        button.nav-btn {
+            background: var(--bg-color); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px;
+            cursor: pointer; font-weight: 600; color: var(--text-sub); transition: all 0.2s; font-size: 14px; white-space: nowrap; min-width: 80px;
+        }
+        button.nav-btn:hover:not(:disabled) { background: var(--accent); color: white; border-color: var(--accent); }
+        button.nav-btn:disabled { opacity: 0.4; cursor: default; }
+        .page-input { width: 40px; text-align: center; border: 1px solid var(--border); border-radius: 6px; padding: 4px; background: var(--bg-color); color: var(--text-main); }
+        
+        /* 5. Fixed CSV Edit Button */
+        .fixed-edit-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+            z-index: 100;
+        }
+        .fixed-edit-btn:hover { transform: translateY(-2px); color: var(--accent); }
+
+        .spinner { border: 3px solid var(--border); border-top: 3px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 0.8s linear infinite; margin: 60px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 600px) {
             .view-preview { grid-template-columns: repeat(2, 1fr); }
-            .view-card .text-content { font-size: 1.4rem; }
-            .controls-area { flex-direction: column; }
+            .quiz-controls { flex-direction: column; align-items: flex-start; }
+            .quiz-range-info { margin-left: 0; margin-top: 5px; }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <select id="view-select" aria-label="View Switcher">
-        <option value="preview">Preview View</option>
-        <option value="list">List View</option>
-        <option value="card">Card View</option>
-    </select>
+<!-- 5. Fixed CSV Edit Button -->
+<a href="https://gist.github.com/yyc9920/a22d2b76349fdff11b2808440da634fe" target="_blank" class="fixed-edit-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+    Edit CSV Data
+</a>
 
-    <div class="toggle-wrapper">
+<header>
+    <div class="header-controls-left">
+        <!-- 3. Dark Mode Toggle -->
+        <div class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+            🌙
+        </div>
+        <select id="view-select" aria-label="View Switcher">
+            <option value="preview">Preview View</option>
+            <option value="list">List View</option>
+            <option value="card">Card View</option>
+            <option value="quiz">Quiz Mode</option>
+        </select>
+    </div>
+
+    <div class="toggle-wrapper" id="furigana-control-area">
         <span class="toggle-title">Furigana</span>
         <div class="toggle-container" id="furigana-toggle" data-state="off" role="switch" aria-checked="false">
             <div class="toggle-bg"></div>
@@ -392,6 +401,12 @@
         </div>
     </div>
 </header>
+
+<!-- 4. Progress Bar -->
+<div class="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+    <span class="progress-text" id="progress-text">0%</span>
+</div>
 
 <div id="app-container">
     <div class="spinner"></div>
@@ -403,50 +418,11 @@
     /* =========================================
        CONFIGURATION
        ========================================= */
-    const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/japanese_phrases.csv';
-
-    // Updated Mock Data (Total 40+ phrases)
+    const GIST_URL = 'https://gist.githubusercontent.com/yyc9920/a22d2b76349fdff11b2808440da634fe/raw/japanese_phrases.csv'; 
     const MOCK_DATA = `Meaning,Kanji,Furigana
-안녕하세요 / Hello,こんにちは,こんにちは
-일본어를 공부하고 있습니다 / I am studying Japanese,日本語を勉強しています,日本[にほん]語[ご]を勉強[べんきょう]しています
-역은 어디입니까? / Where is the station?,駅はどこですか？,駅[えき]はどこですか？
-이것은 매우 맛있네요 / This is very delicious,これはとても美味しいですね,これはとても美味[おい]しいですね
-만나서 반갑습니다 / Nice to meet you,初めまして、よろしくお願いします,初[はじ]めまして、よろしくお願[ねが]いします
-지금 몇 시입니까? / What time is it now?,今何時ですか？,今[いま]何[なん]時[じ]ですか？
-영화를 보는 것을 좋아합니다 / I like watching movies,映画を見るのが好きです,映画[えいが]を見[み]るのが好[す]きです
-잠시만 기다려 주세요 / Please wait a moment,少々お待ちください,少々[しょうしょう]お待[ま]ちください
-카드로 결제할 수 있나요? / Can I pay by card?,カードで支払えますか？,カードで支払[しはら]えますか？
-내일 날씨는 어떻습니까? / How is the weather tomorrow?,明日の天気はどうですか？,明日[あした]の天気[てんき]はどうですか？
-저의 취미는 독서입니다 / My hobby is reading,私の趣味は読書です,私[わたし]の趣味[しゅみ]は読書[どくしょ]です
-도와주셔서 감사합니다 / Thank you for your help,手伝ってくれてありがとうございます,手伝[てつだ]ってくれてありがとうございます
-이해하지 못했습니다 / I didn't understand,理解できませんでした,理解[りかい]できませんでした
-천천히 말해 주세요 / Please speak slowly,ゆっくり話してください,ゆっくり話[はな]してください
-화장실은 어디입니까? / Where is the restroom?,お手洗いはどこですか？,お手洗[てあら]いはどこですか？
-기차표를 예매하고 싶습니다 / I want to book a train ticket,電車の切符を予約したいです,電車[でんしゃ]の切符[きっぷ]を予約[よやく]したいです
-이 근처에 맛집이 있나요? / Is there a good restaurant nearby?,この近くに美味しい店はありますか？,この近[ちか]くに美味[おい]しい店[みせ]はありますか？
-사진을 찍어 주시겠습니까? / Could you take a picture for me?,写真を撮っていただけませんか？,写真[しゃしん]を撮[と]っていただけませんか？
-메뉴판을 보여주세요 / Please show me the menu,メニューを見せてください,メニューを見[み]せてください
-물 좀 주시겠어요? / Could I have some water?,お水をいただけますか？,お水[みず]をいただけますか？
-제 여동생의 사진입니다 / This is a picture of my little sister,これは私の妹の写真です,これは私[わたし]の妹[いもうと]の写真[しゃしん]です
-디즈니랜드에 가고 싶습니다 / I want to go to Disneyland,ディズニーランドに行きたいです,ディズニーランドに行[い]きたいです
-오늘은 일하러 갔습니다 / I went to work today,今日は仕事に行きました,今日[きょう]は仕事[しごと]に行[い]きました
-저 공원에서 만납시다 / Let's meet at that park,あの公園で会いましょう,あの公園[こうえん]で会[あ]いましょう
-여기가 제 집입니다 / This is my house,これが私の家です,これが私[わたし]の家[いえ]です
-모두가 다른 것을 말합니다 / Everyone says something different,みんなが違う事を言う,みんなが違[ちが]う事[こと]を言[い]う
-커서 무엇이 되고 싶니? / What do you want to be when you grow up?,大きくなったら何になる？,大[おお]きくなったら何[なに]になる？
-역에서 학교까지 얼마나 걸립니까? / How long does it take from the station to school?,駅から学校まではどのくらいかかりますか,駅[えき]から学校[がっこう]まではどのくらいかかりますか
-그것은 좋은 생각이 아니라고 생각합니다 / I don't think that's a good idea,それはいいアイディアではないと思う,それはいいアイディアではないと思[おも]う
-세상에는 많은 사람이 있습니다 / There are many people in the world,世界には多くの人がいます,世界[せかい]には多[おお]くの人[ひと]がいます
-자세히 보면 작은 구멍이 있네요 / If you look closely there is a small hole,よく見ると小さな穴があるね,よく見[み]ると小[ちい]さな穴[あな]があるね
-자신의 문제는 스스로 해결하세요 / Solve your own problems yourself,自分の問題は自分で解決しなさい,自分[じぶん]の問題[もんだい]は自分[じぶん]で解決[かいけつ]しなさい
-이쪽으로 와 주세요 / Please come this way,こっちの方にきてください,こっちの方[ほう]にきてください
-저는 건강을 위해 채소를 먹습니다 / I eat vegetables for my health,私は健康の為に野菜を食べます,私[わたし]は健康[けんこう]の為[ため]に野菜[やさい]を食[た]べます
-차에서 라디오를 듣습니다 / I listen to the radio in the car,車でラジオを聴く,車[くるま]でラジオを聴[き]く
-오늘은 새로운 카드를 사용합니다 / I am using a new card today,今日は新しいカードを使う,今日[きょう]は新[あたら]しいカードを使[つか]う
-일본은 섬나라입니다 / Japan is an island nation,日本は島国です,日本[にほん]は島国[しまぐに]です
-인터넷에서 지진에 대한 뉴스를 알게 되었습니다 / I learned about the earthquake news on the internet,インターネットで地震についてのニュースを知った,インターネットで地震[じしん]についてのニュースを知[し]った
-오늘 아주 큰 개를 데리고 있는 사람을 만났습니다 / I met a person with a very big dog today,今日はとても大きな犬を連れている人に会った,今日[きょう]はとても大[おお]きな犬[いぬ]を連[つ]れている人[ひと]に会[あ]った
-저는 매일 일기를 씁니다 / I write a diary every day,私は毎日日記を書く,私[わたし]は毎日[まいにち]日記[にっき]を書[か]く`;
+안녕하세요,こんにちは,こんにちは
+일본어를 공부하고 있습니다,日本語を勉強しています,日本[にほん]語[ご]を勉強[べんきょう]しています
+역은 어디입니까?,駅はどこですか？,駅[えき]はどこですか？`;
 
     /* =========================================
        STATE MANAGEMENT
@@ -457,7 +433,23 @@
         furigana: false,
         page: 1,
         itemsPerPage: 10,
-        currentIndex: 0
+        currentIndex: 0,
+        theme: localStorage.getItem('app_theme') || 'light',
+        
+        // Quiz Config
+        quizMode: 'random', 
+        quizRangeStr: '',   
+        quizAllowedIndices: [], 
+        onlyIncorrect: false, // 2. Incorrect Only Mode
+
+        // Persistent Data (LocalStorage)
+        learnedIndices: new Set(JSON.parse(localStorage.getItem('learned_indices') || '[]')),
+        incorrectIndices: new Set(JSON.parse(localStorage.getItem('incorrect_indices') || '[]')),
+
+        // Current Quiz Data
+        quiz: {
+            item: null, type: 0, questionText: '', targetAnswer: '', answered: false, correct: false, userAnswer: '', context: '' 
+        }
     };
 
     /* =========================================
@@ -466,29 +458,34 @@
     const appContainer = document.getElementById('app-container');
     const viewSelect = document.getElementById('view-select');
     const furiganaToggle = document.getElementById('furigana-toggle');
+    const furiganaControlArea = document.getElementById('furigana-control-area');
     const paginationControls = document.getElementById('pagination-controls');
+    const themeToggle = document.getElementById('theme-toggle');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
 
     /* =========================================
        INITIALIZATION
        ========================================= */
     async function init() {
-        if (GIST_URL && GIST_URL.startsWith('http')) {
+        applyTheme(state.theme);
+        
+        if (GIST_URL) {
             try {
-                const response = await fetch(GIST_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
+                const response = await fetch(`${GIST_URL}?t=${new Date().getTime()}`);
+                if (!response.ok) throw new Error('Network response');
                 const text = await response.text();
                 state.data = parseCSV(text);
             } catch (e) {
-                console.warn("Gist loading failed, using mock data.", e);
+                console.warn("Using mock data");
                 state.data = parseCSV(MOCK_DATA);
             }
         } else {
-            setTimeout(() => {
-                state.data = parseCSV(MOCK_DATA);
-                render();
-            }, 600);
-            return;
+            state.data = parseCSV(MOCK_DATA);
         }
+        
+        updateQuizRange('');
+        updateProgress();
         render();
     }
 
@@ -516,12 +513,94 @@
         return state.furigana ? (item.furigana || item.kanji) : item.kanji;
     }
 
+    function extractReading(furiganaText) {
+        let clean = furiganaText.replace(/([\u4e00-\u9faf\u3005]+)\[([^\]]+)\]/g, '$2');
+        clean = clean.replace(/\[/g, '').replace(/\]/g, '');
+        return clean;
+    }
+
+    // 1. TTS Function
+    function speakText(text) {
+        if (!window.speechSynthesis) {
+            alert("이 브라우저는 음성 합성을 지원하지 않습니다.");
+            return;
+        }
+        window.speechSynthesis.cancel(); // Stop previous
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ja-JP';
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 3. Theme Logic
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        themeToggle.innerText = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    function toggleTheme() {
+        state.theme = state.theme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('app_theme', state.theme);
+        applyTheme(state.theme);
+    }
+
+    // 4. Progress Logic
+    function updateProgress() {
+        if (state.data.length === 0) return;
+        const percent = Math.round((state.learnedIndices.size / state.data.length) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressText.innerText = `${percent}% Learned`;
+    }
+
+    // Quiz Range & Filter Logic
+    function updateQuizRange(inputStr) {
+        state.quizRangeStr = inputStr.trim();
+        const total = state.data.length;
+        let indices = new Set();
+
+        if (!state.quizRangeStr) {
+            for(let i=0; i<total; i++) indices.add(i);
+        } else {
+            const parts = state.quizRangeStr.split(',');
+            parts.forEach(part => {
+                part = part.trim();
+                if (part.includes('~') || part.includes('-')) {
+                    const rangeParts = part.split(/[~-]/);
+                    if (rangeParts.length === 2) {
+                        let start = parseInt(rangeParts[0]);
+                        let end = parseInt(rangeParts[1]);
+                        if (!isNaN(start) && !isNaN(end)) {
+                            if (start > end) [start, end] = [end, start];
+                            for (let i = start; i <= end; i++) {
+                                if (i >= 1 && i <= total) indices.add(i - 1);
+                            }
+                        }
+                    }
+                } else {
+                    const num = parseInt(part);
+                    if (!isNaN(num) && num >= 1 && num <= total) indices.add(num - 1);
+                }
+            });
+        }
+
+        // Filter for Incorrect Only if enabled
+        if (state.onlyIncorrect) {
+            const filtered = new Set();
+            indices.forEach(idx => {
+                if (state.incorrectIndices.has(idx)) filtered.add(idx);
+            });
+            state.quizAllowedIndices = Array.from(filtered).sort((a,b) => a - b);
+        } else {
+            state.quizAllowedIndices = Array.from(indices).sort((a,b) => a - b);
+        }
+    }
+
     /* =========================================
        EVENT LISTENERS
        ========================================= */
     viewSelect.addEventListener('change', (e) => {
         state.view = e.target.value;
         state.page = 1;
+        if (state.view === 'quiz') generateNewQuiz();
         render();
     });
 
@@ -531,95 +610,269 @@
         render(); 
     });
 
+    themeToggle.addEventListener('click', toggleTheme);
+
     /* =========================================
-       UNIFIED PAGINATION COMPONENT
+       QUIZ LOGIC
        ========================================= */
-    function renderPaginationControls({ current, total, onPrev, onNext, onJump, showPerPage }) {
-        paginationControls.innerHTML = '';
-        const wrapper = document.createElement('div');
-        wrapper.className = 'pagination-wrapper';
-
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'nav-btn';
-        prevBtn.innerText = '← Prev';
-        prevBtn.disabled = current <= 1;
-        prevBtn.onclick = onPrev;
-
-        const inputGroup = document.createElement('div');
-        inputGroup.className = 'page-input-group';
+    function generateNewQuiz() {
+        if (state.data.length === 0) return;
         
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.className = 'page-input';
-        input.value = current;
-        input.min = 1;
-        input.max = total;
-        
-        const handleJump = () => {
-            let val = parseInt(input.value);
-            if (isNaN(val) || val < 1) val = 1;
-            if (val > total) val = total;
-            if (val !== current) onJump(val);
-            else input.value = val;
-        };
-        input.onblur = handleJump;
-        input.onkeydown = (e) => { if(e.key === 'Enter') handleJump(); };
-
-        inputGroup.appendChild(input);
-        inputGroup.appendChild(document.createTextNode(` / ${total}`));
-
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'nav-btn';
-        nextBtn.innerText = 'Next →';
-        nextBtn.disabled = current >= total;
-        nextBtn.onclick = onNext;
-
-        wrapper.appendChild(prevBtn);
-        wrapper.appendChild(inputGroup);
-        wrapper.appendChild(nextBtn);
-        paginationControls.appendChild(wrapper);
-
-        if (showPerPage) {
-            const ippWrapper = document.createElement('div');
-            ippWrapper.className = 'ipp-wrapper';
-            ippWrapper.innerHTML = `
-                <span>Show:</span>
-                <select id="ipp-select">
-                    <option value="10" ${state.itemsPerPage===10?'selected':''}>10</option>
-                    <option value="20" ${state.itemsPerPage===20?'selected':''}>20</option>
-                    <option value="30" ${state.itemsPerPage===30?'selected':''}>30</option>
-                </select>
-            `;
-            paginationControls.appendChild(ippWrapper);
-            document.getElementById('ipp-select').addEventListener('change', (e) => {
-                state.itemsPerPage = parseInt(e.target.value);
-                state.page = 1;
-                render();
-            });
+        let randomIndex;
+        if (state.quizAllowedIndices.length > 0) {
+            const randPos = Math.floor(Math.random() * state.quizAllowedIndices.length);
+            randomIndex = state.quizAllowedIndices[randPos];
+        } else {
+            // Fallback if no incorrect items but mode is on
+            if(state.onlyIncorrect) {
+                state.quiz = { item: null, empty: true };
+                return;
+            }
+            randomIndex = Math.floor(Math.random() * state.data.length);
         }
+
+        const item = state.data[randomIndex];
+        
+        let availableTypes = [];
+        if (state.quizMode === 'cloze') availableTypes = [2];
+        else if (state.quizMode === 'sentence') availableTypes = [0, 1];
+        else availableTypes = [0, 1, 2];
+        
+        const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        
+        let questionText = '', targetAnswer = '', context = '';
+
+        if (randomType === 0) { // Writing
+            questionText = item.meaning; targetAnswer = item.kanji; context = '일본어로 작문하세요';
+        } else if (randomType === 1) { // Reading
+            questionText = item.kanji; targetAnswer = extractReading(item.furigana); context = '히라가나로 읽는 법을 쓰세요';
+        } else { // Cloze
+            const subType = Math.random() > 0.5 ? 0 : 1;
+            if (subType === 0) { // Blank in Kanji
+                context = `[빈칸 채우기] 다음 문장의 뜻은: "${item.meaning}"`;
+                const text = item.kanji;
+                if (text.length <= 2) { questionText = item.meaning; targetAnswer = item.kanji; context = '일본어로 작문하세요'; } 
+                else {
+                    const maskLen = Math.min(Math.floor(Math.random() * 2) + 2, text.length - 1);
+                    const startIdx = Math.floor(Math.random() * (text.length - maskLen));
+                    const partToMask = text.substring(startIdx, startIdx + maskLen);
+                    questionText = text.substring(0, startIdx) + '______' + text.substring(startIdx + maskLen);
+                    targetAnswer = partToMask;
+                }
+            } else { // Blank in Meaning
+                context = `[빈칸 채우기] 다음 문장의 일본어는: "${item.kanji}"`;
+                const text = item.meaning;
+                const words = text.split(' ');
+                if (words.length <= 1) { questionText = item.kanji; targetAnswer = item.meaning; context = '한국어 뜻을 쓰세요'; }
+                else {
+                    const maskIdx = Math.floor(Math.random() * words.length);
+                    targetAnswer = words[maskIdx];
+                    words[maskIdx] = '______';
+                    questionText = words.join(' ');
+                }
+            }
+        }
+
+        state.quiz = {
+            item: item, type: randomType, questionText: questionText, targetAnswer: targetAnswer,
+            context: context, answered: false, correct: false, userAnswer: '', empty: false
+        };
+    }
+
+    function checkQuizAnswer() {
+        const inputEl = document.getElementById('quiz-input');
+        if (!inputEl) return;
+        const userVal = inputEl.value.trim();
+        state.quiz.userAnswer = userVal;
+        state.quiz.answered = true;
+
+        const cleanUser = userVal.replace(/[。、\s]/g, '');
+        const cleanCorrect = state.quiz.targetAnswer.replace(/[。、\s]/g, '');
+        const isCorrect = (cleanUser === cleanCorrect);
+        state.quiz.correct = isCorrect;
+
+        const itemIndex = state.data.indexOf(state.quiz.item);
+
+        if (isCorrect) {
+            // 4. Update Learned (Only for Writing Quiz - Type 0)
+            if (state.quiz.type === 0) {
+                state.learnedIndices.add(itemIndex);
+                localStorage.setItem('learned_indices', JSON.stringify([...state.learnedIndices]));
+                updateProgress();
+            }
+            // Remove from Incorrect list if correct
+            if (state.incorrectIndices.has(itemIndex)) {
+                state.incorrectIndices.delete(itemIndex);
+                localStorage.setItem('incorrect_indices', JSON.stringify([...state.incorrectIndices]));
+                // If in 'only incorrect' mode, update range immediately
+                if (state.onlyIncorrect) updateQuizRange(state.quizRangeStr);
+            }
+        } else {
+            // 2. Add to Incorrect List
+            state.incorrectIndices.add(itemIndex);
+            localStorage.setItem('incorrect_indices', JSON.stringify([...state.incorrectIndices]));
+        }
+
+        renderQuiz(); 
+    }
+
+    function getDiffHtml(user, correct) {
+        if (user === correct) return `<span class="diff-char diff-correct">${user}</span>`;
+        return `<span class="diff-char diff-wrong">${user}</span> <span class="diff-char diff-correct">${correct}</span>`;
     }
 
     /* =========================================
        RENDERING LOGIC
        ========================================= */
     function render() {
+        if (state.view === 'quiz') {
+            furiganaControlArea.style.visibility = 'hidden';
+            paginationControls.style.display = 'none';
+        } else {
+            furiganaControlArea.style.visibility = 'visible';
+            paginationControls.style.display = 'flex';
+        }
+
         appContainer.style.opacity = '0';
         setTimeout(() => {
             appContainer.className = `view-${state.view}`;
-            appContainer.innerHTML = '';
-
+            appContainer.innerHTML = ''; 
             if (state.data.length === 0) {
-                appContainer.innerHTML = '<div style="text-align:center; padding:40px; color:#888;">데이터가 없습니다.</div>';
-                paginationControls.innerHTML = '';
+                appContainer.innerHTML = '<div style="text-align:center; padding:40px; color:#888;">데이터를 불러오는 중입니다...</div>';
             } else {
                 switch (state.view) {
                     case 'preview': renderPreview(); break;
                     case 'list': renderList(); break;
                     case 'card': renderCard(); break;
+                    case 'quiz': renderQuizWrapper(); break;
                 }
             }
             appContainer.style.opacity = '1';
-        }, 200);
+        }, 150);
+    }
+
+    function renderQuizWrapper() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'view-quiz';
+
+        const controlsWrapper = document.createElement('div');
+        controlsWrapper.className = 'quiz-controls-wrapper';
+
+        // Row 1: Mode & Incorrect Toggle
+        const controls1 = document.createElement('div');
+        controls1.className = 'quiz-controls';
+        controls1.innerHTML = `
+            <label>Mode: <select id="quiz-mode-select">
+                <option value="random" ${state.quizMode==='random'?'selected':''}>랜덤 (Random)</option>
+                <option value="sentence" ${state.quizMode==='sentence'?'selected':''}>작문/읽기 (Sentence)</option>
+                <option value="cloze" ${state.quizMode==='cloze'?'selected':''}>빈칸 (Cloze)</option>
+            </select></label>
+            <label style="cursor:pointer;"><input type="checkbox" id="quiz-incorrect-only" ${state.onlyIncorrect?'checked':''}> 오답만 풀기 (${state.incorrectIndices.size})</label>
+        `;
+
+        // Row 2: Range
+        const controls2 = document.createElement('div');
+        controls2.className = 'quiz-controls';
+        controls2.innerHTML = `
+            <label>Range: <input type="text" id="quiz-range-input" class="quiz-range-input" placeholder="ex: 1~10" value="${state.quizRangeStr}"></label>
+            <span id="quiz-range-count" class="quiz-range-info">총 ${state.quizAllowedIndices.length}개</span>
+        `;
+
+        controlsWrapper.appendChild(controls1);
+        controlsWrapper.appendChild(controls2);
+        wrapper.appendChild(controlsWrapper);
+
+        const content = document.createElement('div');
+        content.id = 'quiz-content-container';
+        content.style.width = '100%';
+        wrapper.appendChild(content);
+        appContainer.appendChild(wrapper);
+
+        // Bind Events
+        document.getElementById('quiz-mode-select').addEventListener('change', (e) => {
+            state.quizMode = e.target.value; generateNewQuiz(); renderQuiz(); 
+        });
+        document.getElementById('quiz-incorrect-only').addEventListener('change', (e) => {
+            state.onlyIncorrect = e.target.checked; 
+            updateQuizRange(state.quizRangeStr); 
+            document.getElementById('quiz-range-count').innerText = `총 ${state.quizAllowedIndices.length}개`;
+            generateNewQuiz(); renderQuiz();
+        });
+        const rangeInput = document.getElementById('quiz-range-input');
+        const updateRangeUI = () => {
+            updateQuizRange(rangeInput.value);
+            document.getElementById('quiz-range-count').innerText = `총 ${state.quizAllowedIndices.length}개`;
+            generateNewQuiz(); renderQuiz();
+        };
+        rangeInput.addEventListener('blur', updateRangeUI);
+        rangeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') { rangeInput.blur(); } });
+
+        renderQuiz(); 
+    }
+
+    function renderQuiz() {
+        let container = document.getElementById('quiz-content-container');
+        if (!container) return;
+        container.innerHTML = ''; 
+
+        if (state.quiz.empty) {
+            container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-sub);">오답 데이터가 없거나 조건에 맞는 문제가 없습니다.</div>';
+            return;
+        }
+
+        if (!state.quiz.item) generateNewQuiz();
+        
+        const { item, type, questionText, context, answered, correct, userAnswer, targetAnswer } = state.quiz;
+        const quizCard = document.createElement('div'); quizCard.className = 'quiz-card';
+
+        const badge = document.createElement('div'); badge.className = 'quiz-context'; badge.innerText = context;
+        const qText = document.createElement('div'); qText.className = 'quiz-question'; qText.innerText = questionText;
+        const inputArea = document.createElement('div'); inputArea.className = 'quiz-input-area';
+
+        if (!answered) {
+            inputArea.innerHTML = `<input type="text" id="quiz-input" class="quiz-input" placeholder="정답 입력" autocomplete="off"><button id="quiz-check-btn" class="quiz-check-btn">정답 확인</button>`;
+            setTimeout(() => {
+                const input = document.getElementById('quiz-input');
+                const btn = document.getElementById('quiz-check-btn');
+                if(input) {
+                    input.focus();
+                    input.onkeydown = (e) => { if(e.key === 'Enter') btn.click(); };
+                    btn.onclick = checkQuizAnswer;
+                }
+            }, 50);
+        } else {
+            const feedback = document.createElement('div');
+            const itemIndex = state.data.indexOf(item) + 1;
+            let extraInfoHtml = `<div class="quiz-info-row">문장 번호: #${itemIndex}</div>`;
+            
+            // Show Meaning or Furigana logic
+            if (type === 1) { // Reading -> Show Meaning
+                extraInfoHtml += `<div class="quiz-info-row">뜻: ${item.meaning}</div>`;
+            } else { // Writing/Cloze -> Show Furigana & TTS
+                const cleanFurigana = item.furigana.replace(/\[/g, '(').replace(/\]/g, ')');
+                extraInfoHtml += `
+                    <div class="quiz-info-row quiz-furigana-hint">
+                        ${cleanFurigana}
+                        <button class="tts-btn" style="font-size:1.2rem; margin:0;" onclick="speakText('${item.kanji}')">🔊</button>
+                    </div>`;
+            }
+
+            if (correct) {
+                feedback.className = 'quiz-feedback success'; feedback.style.display = 'block';
+                feedback.innerHTML = `🎉 정답입니다!<br><br><strong>${targetAnswer}</strong><div class="quiz-meta-info">${extraInfoHtml}</div>`;
+            } else {
+                feedback.className = 'quiz-feedback error'; feedback.style.display = 'block';
+                feedback.innerHTML = `<strong>오답입니다.</strong><br><div style="margin-top:10px;">${getDiffHtml(userAnswer, targetAnswer)}</div><div class="quiz-meta-info">${extraInfoHtml}</div>`;
+            }
+            inputArea.appendChild(feedback);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'quiz-next-btn'; nextBtn.innerText = '다음 문제 →';
+            nextBtn.onclick = () => { generateNewQuiz(); renderQuiz(); };
+            inputArea.appendChild(nextBtn);
+        }
+
+        quizCard.appendChild(badge); quizCard.appendChild(qText); quizCard.appendChild(inputArea); container.appendChild(quizCard);
     }
 
     function renderPreview() {
@@ -627,27 +880,11 @@
         const end = start + state.itemsPerPage;
         const pageItems = state.data.slice(start, end);
         const totalPages = Math.ceil(state.data.length / state.itemsPerPage) || 1;
-
-        renderPaginationControls({
-            current: state.page,
-            total: totalPages,
-            onPrev: () => { state.page--; render(); },
-            onNext: () => { state.page++; render(); },
-            onJump: (pageNum) => { state.page = pageNum; render(); },
-            showPerPage: true
-        });
-
+        renderPaginationControls({ current: state.page, total: totalPages, onPrev: () => { state.page--; render(); }, onNext: () => { state.page++; render(); }, onJump: (n) => { state.page = n; render(); }, showPerPage: true });
         pageItems.forEach((item, idx) => {
-            const realIdx = start + idx;
-            const el = document.createElement('div');
-            el.className = 'card-preview';
+            const realIdx = start + idx; const el = document.createElement('div'); el.className = 'card-preview';
             el.innerHTML = `<div class="text-content">${getDisplayHtml(item)}</div>`;
-            el.onclick = () => {
-                state.currentIndex = realIdx;
-                state.view = 'card';
-                viewSelect.value = 'card';
-                render();
-            };
+            el.onclick = () => { state.currentIndex = realIdx; state.view = 'card'; viewSelect.value = 'card'; render(); };
             appContainer.appendChild(el);
         });
     }
@@ -657,139 +894,57 @@
         const end = start + state.itemsPerPage;
         const pageItems = state.data.slice(start, end);
         const totalPages = Math.ceil(state.data.length / state.itemsPerPage) || 1;
-
-        renderPaginationControls({
-            current: state.page,
-            total: totalPages,
-            onPrev: () => { state.page--; render(); },
-            onNext: () => { state.page++; render(); },
-            onJump: (pageNum) => { state.page = pageNum; render(); },
-            showPerPage: true
-        });
-
+        renderPaginationControls({ current: state.page, total: totalPages, onPrev: () => { state.page--; render(); }, onNext: () => { state.page++; render(); }, onJump: (n) => { state.page = n; render(); }, showPerPage: true });
         pageItems.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'card-list';
+            const el = document.createElement('div'); el.className = 'card-list';
             const jpContent = `<div class="text-content">${getDisplayHtml(item)}</div>`;
             const meaningContent = `<div class="text-content" style="color:var(--accent); font-weight:500;">${item.meaning}</div>`;
             el.innerHTML = jpContent;
-            
             let isFlipped = false;
-            el.onclick = () => {
-                isFlipped = !isFlipped;
-                if(isFlipped) {
-                    el.classList.add('flipped');
-                    el.innerHTML = meaningContent;
-                } else {
-                    el.classList.remove('flipped');
-                    el.innerHTML = jpContent;
-                }
-            };
+            el.onclick = () => { isFlipped = !isFlipped; if(isFlipped) { el.classList.add('flipped'); el.innerHTML = meaningContent; } else { el.classList.remove('flipped'); el.innerHTML = jpContent; } };
             appContainer.appendChild(el);
         });
     }
 
-    // --- 3. Card View (With Swipe) ---
     function renderCard() {
         const item = state.data[state.currentIndex];
-        
-        renderPaginationControls({
-            current: state.currentIndex + 1,
-            total: state.data.length,
-            onPrev: () => { state.currentIndex--; render(); },
-            onNext: () => { state.currentIndex++; render(); },
-            onJump: (cardNum) => { state.currentIndex = cardNum - 1; render(); },
-            showPerPage: false
-        });
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'card-single';
-        
-        const front = `
-            <div class="card-face card-front">
-                <div class="text-content">${getDisplayHtml(item)}</div>
-            </div>`;
-        const back = `
-            <div class="card-face card-back">
-                <div class="text-content" style="font-size: 1.5rem; margin-bottom: 10px;">${item.meaning}</div>
-                <div style="font-size: 0.85rem; opacity: 0.6; font-weight: 400;">(Tap to flip back)</div>
-            </div>`;
-        
+        renderPaginationControls({ current: state.currentIndex + 1, total: state.data.length, onPrev: () => { state.currentIndex--; render(); }, onNext: () => { state.currentIndex++; render(); }, onJump: (n) => { state.currentIndex = n - 1; render(); }, showPerPage: false });
+        const wrapper = document.createElement('div'); wrapper.className = 'card-single';
+        const front = `<div class="card-face card-front">
+            <div class="text-content">${getDisplayHtml(item)}</div>
+            <button class="tts-btn" onclick="event.stopPropagation(); speakText('${item.kanji}')">🔊</button>
+        </div>`;
+        const back = `<div class="card-face card-back"><div class="text-content" style="font-size: 1.5rem; margin-bottom: 10px;">${item.meaning}</div><div style="font-size: 0.85rem; opacity: 0.6; font-weight: 400;">(Tap to flip back)</div></div>`;
         wrapper.innerHTML = front + back;
-        
-        // --- Swipe Logic Start ---
-        let startX = 0, startY = 0;
-        let currentX = 0, currentY = 0;
-        let isDragging = false;
-        const swipeThreshold = 80; // Minimum distance to trigger swipe
-
-        wrapper.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            isDragging = false;
-            wrapper.style.transition = 'none'; // Dragging 시 즉각 반응을 위해 transition 제거
-        });
-
-        wrapper.addEventListener('touchmove', (e) => {
-            currentX = e.touches[0].clientX;
-            currentY = e.touches[0].clientY;
-            const deltaX = currentX - startX;
-            const deltaY = currentY - startY;
-
-            // 수평 움직임이 수직보다 클 때만 스와이프로 간주하고 스크롤 방지
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-                e.preventDefault();
-                isDragging = true;
-                // 카드 이동 및 회전 효과
-                const rotation = deltaX * 0.05;
-                wrapper.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
-            }
-        });
-
-        wrapper.addEventListener('touchend', (e) => {
-            wrapper.style.transition = 'transform 0.3s ease'; // Transition 복구
-            const deltaX = currentX - startX;
-
-            if (isDragging) {
-                // Next (Swipe Left)
-                if (deltaX < -swipeThreshold && state.currentIndex < state.data.length - 1) {
-                    wrapper.style.transform = `translateX(-120vw) rotate(-20deg)`;
-                    setTimeout(() => {
-                        state.currentIndex++;
-                        render();
-                    }, 250);
-                } 
-                // Prev (Swipe Right)
-                else if (deltaX > swipeThreshold && state.currentIndex > 0) {
-                    wrapper.style.transform = `translateX(120vw) rotate(20deg)`;
-                    setTimeout(() => {
-                        state.currentIndex--;
-                        render();
-                    }, 250);
-                } 
-                // Return to center (Not enough swipe)
-                else {
-                    wrapper.style.transform = '';
-                }
-            }
-            // Reset
-            startX = 0; startY = 0;
-            currentX = 0; currentY = 0;
-        });
-
-        // Click to Flip (Mouse click or Tap without drag)
-        wrapper.onclick = (e) => {
-            // 드래그가 발생했다면 클릭(뒤집기) 무시
-            if (isDragging) return;
-            wrapper.classList.toggle('flipped');
-        };
-        // --- Swipe Logic End ---
-
+        let startX = 0, startY = 0, currentX = 0, currentY = 0, isDragging = false; const swipeThreshold = 80;
+        wrapper.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; isDragging = false; wrapper.style.transition = 'none'; });
+        wrapper.addEventListener('touchmove', (e) => { currentX = e.touches[0].clientX; currentY = e.touches[0].clientY; const deltaX = currentX - startX; const deltaY = currentY - startY; if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) { e.preventDefault(); isDragging = true; wrapper.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.05}deg)`; } });
+        wrapper.addEventListener('touchend', (e) => { wrapper.style.transition = 'transform 0.3s ease'; const deltaX = currentX - startX; if (isDragging) { if (deltaX < -swipeThreshold && state.currentIndex < state.data.length - 1) { wrapper.style.transform = `translateX(-120vw) rotate(-20deg)`; setTimeout(() => { state.currentIndex++; render(); }, 250); } else if (deltaX > swipeThreshold && state.currentIndex > 0) { wrapper.style.transform = `translateX(120vw) rotate(20deg)`; setTimeout(() => { state.currentIndex--; render(); }, 250); } else { wrapper.style.transform = ''; } } });
+        wrapper.onclick = (e) => { if (!isDragging) wrapper.classList.toggle('flipped'); };
         appContainer.appendChild(wrapper);
     }
 
-    init();
+    function renderPaginationControls({ current, total, onPrev, onNext, onJump, showPerPage }) {
+        paginationControls.innerHTML = '';
+        const wrapper = document.createElement('div'); wrapper.className = 'pagination-wrapper';
+        const prevBtn = document.createElement('button'); prevBtn.className = 'nav-btn'; prevBtn.innerText = '← Prev'; prevBtn.disabled = current <= 1; prevBtn.onclick = onPrev;
+        const inputGroup = document.createElement('div'); inputGroup.className = 'page-input-group';
+        const input = document.createElement('input'); input.type = 'number'; input.className = 'page-input'; input.value = current; input.min = 1; input.max = total;
+        const handleJump = () => { let val = parseInt(input.value); if (isNaN(val) || val < 1) val = 1; if (val > total) val = total; if (val !== current) onJump(val); else input.value = val; };
+        input.onblur = handleJump; input.onkeydown = (e) => { if(e.key === 'Enter') handleJump(); };
+        inputGroup.appendChild(input); inputGroup.appendChild(document.createTextNode(` / ${total}`));
+        const nextBtn = document.createElement('button'); nextBtn.className = 'nav-btn'; nextBtn.innerText = 'Next →'; nextBtn.disabled = current >= total; nextBtn.onclick = onNext;
+        wrapper.appendChild(prevBtn); wrapper.appendChild(inputGroup); wrapper.appendChild(nextBtn); paginationControls.appendChild(wrapper);
+        if (showPerPage) {
+            const ippWrapper = document.createElement('div'); ippWrapper.className = 'ipp-wrapper';
+            ippWrapper.innerHTML = `<span>Show:</span><select id="ipp-select"><option value="10" ${state.itemsPerPage===10?'selected':''}>10</option><option value="20" ${state.itemsPerPage===20?'selected':''}>20</option><option value="30" ${state.itemsPerPage===30?'selected':''}>30</option></select>`;
+            paginationControls.appendChild(ippWrapper); document.getElementById('ipp-select').addEventListener('change', (e) => { state.itemsPerPage = parseInt(e.target.value); state.page = 1; render(); });
+        }
+    }
 
+    init();
 </script>
 </body>
 </html>
+
+
